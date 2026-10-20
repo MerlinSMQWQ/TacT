@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" role="img" aria-labelledby="title description">
+  <title id="title">TacT logo</title>
+  <desc id="description">A central T framed by two open, evenly spaced curves.</desc>
+  <rect width="256" height="256" rx="48" fill="#153139"/>
+  <path d="M89 49C56 49 40 70 40 103v50c0 33 16 54 49 54v-15c-23 0-34-15-34-39v-50c0-24 11-39 34-39V49Z" fill="#8AD5C2"/>
+  <path d="M167 49c33 0 49 21 49 54v50c0 33-16 54-49 54v-15c23 0 34-15 34-39v-50c0-24-11-39-34-39V49Z" fill="#E9BD83"/>
+  <rect x="91" y="83" width="74" height="16" rx="8" fill="#F7F3E8"/>
+  <rect x="120" y="83" width="16" height="88" rx="8" fill="#F7F3E8"/>
+</svg>

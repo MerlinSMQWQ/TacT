@@ -1,6 +1,8 @@
 # TacT Agent Kit
 
-Engineering guidance for developers working with agents: better delivery, useful judgment, and interaction that helps the developer observe, learn, and guide important choices.
+<img src="assets/logo.svg" alt="TacT logo" width="112" height="112">
+
+TacT takes its name from *tact*: a sense of proportion and consideration in how people work together. This Agent Kit offers engineering guidance for developers working with agents: better delivery, useful judgment, and interaction that helps the developer observe, learn, and guide important choices.
 
 Start with [the adoption guide](core/README.md) and [developer–agent collaboration](core/collaboration.md). The shared distribution unit is [AGENTS.md](AGENTS.md) plus `core/`; the adopting project owns `project/`.
 
