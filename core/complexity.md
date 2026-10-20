@@ -16,6 +16,10 @@ Do not hide unresolved problems behind broad exception handling, silent fallback
 
 When you discover problems outside the current task, first determine whether they affect this delivery or represent an important risk that needs prompt attention. Other suggestions can be raised briefly when they have real value; they do not automatically become requirements for the current task, and not every idea needs to be reported. Conversely, when structural changes are genuinely needed to solve a problem correctly, do not keep adding patches to the wrong structure merely to minimize the diff.
 
+## Keep changes focused and reviewable
+
+Changes should be clearly reviewable. Code outside the current task's scope should not be modified by default, even when improvements are apparent — this includes formatting adjustments, renaming, reorganizing imports, and rewriting comments. These incidental changes appear harmless but dilute the information density of the diff, making it harder for reviewers to identify what actually changed, and can introduce unintended behavior changes. When improvements worth making are found, note them briefly and let the developer decide whether to include them in the current change.
+
 ## Keep the business flow readable
 
 Important business processes should be understandable by reading through them. Do not bury them in defensive code and supporting mechanisms, or split them so far apart that the maintainer must keep jumping between functions and files to reconstruct their meaning.
@@ -38,7 +42,7 @@ If a low-cost investigation still cannot resolve an uncertainty, and the answer 
 
 Until a consequential answer is confirmed, do not unilaterally delete the mechanism, retain it as a permanent design choice, or add compatibility logic to accommodate every guess. Continue work that is unaffected. Make reasonable choices about low-risk, reversible implementation details yourself rather than turning every judgment into an approval request.
 
-After an answer is confirmed, preserve reusable reasons where they apply, following [evolving.md](evolving.md). Use a clear existing answer without repeatedly seeking confirmation while its premises remain valid; recheck applicability when they change.
+After an answer is confirmed, preserve reusable reasons and constraints where they apply, following [evolving.md](evolving.md). Use a clear existing answer without repeatedly seeking confirmation while its premises remain valid; recheck applicability when they change.
 
 ## Why these distinctions matter
 

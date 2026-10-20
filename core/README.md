@@ -1,48 +1,43 @@
 # Using the TacT Agent Kit
 
-TacT is engineering guidance for developers working with agents. It keeps judgment, delivery, and collaboration connected: the agent advances the task, the developer supplies decisions only they can make, and both can see the evidence and trade-offs that matter.
+TacT helps developers and agents make engineering judgments together. Delivery quality and the experience of working together have equal weight. The agent advances the task and supplies evidence; the developer can observe, learn, and guide important choices while they still affect the result.
 
-Start here and with [collaboration.md](collaboration.md) when adopting the Kit. An agent already carrying out a bounded task can skip this adoption guide once the entry, project constraints, and relevant topic guidance are available.
+Read this guide and [collaboration.md](collaboration.md) when adopting the Kit. Once setup and the relevant guidance are clear, ordinary tasks do not need to reread this guide.
 
-## Adopt it in one real project
+## Set up a project
 
-1. Read the project's existing instructions before changing them. Preserve its effective constraints, work mode, and authorization limits in `project/notes.md`; retain longer reasons in project topic files where useful. Do not overwrite an existing entry and lose its rules.
-2. Copy the root `AGENTS.md` and the complete `core/` directory from one TacT source snapshot. Preserve an existing `project/`; add its `README.md` and `notes.md` only if absent, using [project/README.md](../project/README.md) as guidance. Start `notes.md` nearly empty when no project constraints are established; there is no required briefing form. The TacT-specific notes and verification supplement are examples, not defaults for another project.
-3. Use the primary tool and the actual way you start work to confirm that the entry is obtained and `project/notes.md` is read before substantive work. Check one relevant core topic together with an existing project supplement, if present. Inspect available prompt or tool records rather than relying on a reading self-report alone.
-4. Choose a real task with a meaningful judgment to make, such as verification scope for a local change or diagnosis after repeated failures. Observe the action and its evidence, not merely whether the agent can recite this index. Keep any unmet adoption checks explicit.
+1. Read the project's existing instructions before replacing its entry. Carry forward confirmed constraints, work mode, and authorization limits into `project/notes.md`. Keep longer reasons in project topic files when useful.
+2. Copy `AGENTS.md` and the complete `core/` directory from the same Git commit. Preserve an existing `project/` directory. If needed, add its `README.md` and a nearly empty `notes.md`, following [the project guide](../project/README.md); do not copy another project's constraints as defaults.
+3. Record the source repository and copied commit in the adopting project's `project/notes.md`. Keep the shared files unchanged there. Propose shared changes in the project notes and bring them back to the Kit repository.
+4. Check the tool and startup method you actually use. Confirm that the agent receives the root entry and reads project notes before substantive work. For a relevant core topic, check that it also reads a matching project supplement if one exists. Use available prompt or tool records to support the check.
+5. Try a real task with a meaningful judgment, such as choosing checks for a local change or diagnosing repeated failures. Look at the action and evidence, rather than whether the agent can repeat the index. Keep unmet checks visible.
 
-The first installation is TacT itself, in Codex. Its scoped evidence and remaining trial questions are recorded in [the migration record](https://github.com/MerlinSMQWQ/TacT/blob/main/docs/migration.md). Other tools and startup paths need their own check; this edition does not supply a compatibility layer or a Skill for each topic.
+The shared files do not guarantee that a host loads them. Topic links require reading when the task calls for them. Other tools or startup methods need their own check; there is no requirement to build a compatibility layer or package every topic as a Skill.
 
-## Work with it
+## Work with the Kit
 
-Give the agent the goal, business facts it cannot obtain, work mode, and authorization that affect this task. It should obtain code, tests, and existing documentation itself. You can intervene when agreed behavior stops getting closer to working, supporting work consumes the delivery, or a material decision needs your judgment. You do not have to supervise each operation or redo all verification; [collaboration.md](collaboration.md) gives examples.
+Give the agent the goal, business facts it cannot obtain, work mode, and relevant authorization. It should obtain code, tests, and existing documentation itself. You can intervene when attempts stop producing evidence, supporting work displaces delivery, or a choice needs your judgment. You do not need to supervise each operation or redo all verification; [collaboration.md](collaboration.md) gives examples.
 
-The entry carries boundaries and frequent judgments. The topic index selects fuller guidance when an action or obstacle calls for it. `core/` and `project/` describe ownership and scope, not loading order. The entry requires project constraints before action and matching project supplements when a core topic is read. Layout puts practices above detailed reasons for navigation; it does not make the host load only half a file.
+The entry carries shared boundaries, frequent judgments, and the reading index. `core/` belongs to the Kit; `project/` belongs to the adopting project. This ownership does not determine reading order: project restrictions may need to be known before any action. A matching project topic adjusts only the parts it names, leaving the rest of core applicable.
 
-## Codex adoption notes
+Paths in the entry start at the Kit's installation root, even when a task runs from a deeper directory. Reuse guidance already in context when it is still current and applicable. Putting practices above detailed reasons helps navigation; it does not make the host load only part of a file.
 
-Codex discovers instruction files along its startup directory path, with override files and a size limit. The arbitrary Markdown files linked by this Kit still require explicit reading; the entry supplies that reading contract. Restart in the intended directory after changing an entry and inspect the actual context. See [official OpenAI documentation](https://developers.openai.com/codex/guides/agents-md).
+## Update or trim the shared files
 
-For the locally checked CLI, `codex debug prompt-input` renders the startup input without a model call. Inspect that input for the effective entry, then use ordinary file-reading records to check notes and topic supplements. The CLI startup check and the current desktop task are distinct evidence; neither establishes every Codex startup path. Do not publish full prompt dumps, which can contain unrelated private instructions.
+Update `AGENTS.md` and `core/` together from one commit. Keep source details in `project/notes.md`, and leave project content intact. Projects may intentionally use different versions. Investigate an unknown source, accidental edits to a shared copy, or an entry that no longer matches its topic files.
 
-## Distribute and update
+Make shared changes, including trimming and index changes, in the Kit repository. Ordinary Kit maintenance here edits those files directly. Adopting projects should not patch their shared copy. Add synchronization tooling only if the actual update burden warrants it.
 
-The shared distribution unit is the root `AGENTS.md` plus `core/`, maintained in this Kit repository. Copy them together from one source version. In an adopting project, record proposed shared edits in `project/notes.md` and bring them back here; do not silently fork the shared copy. Trimming, merging topics, and changing the index are shared-source changes too.
+Keep a known source version or original authoring baseline available for fallback. If a regression is suspected, compare a bounded task from the same starting state and similar model settings. When restoring an entry, preserve current project constraints and their pre-action reading. Avoid changing principles, task, and model together and attributing the result to the split.
 
-Do not overwrite `project/` with a shared update. Projects may intentionally use different snapshots. Investigate unknown provenance, accidental divergence from the same snapshot, or an entry that no longer matches its topic files. Add synchronization scripts or a submodule only if an observed maintenance burden warrants them.
+## Why the Kit preserves reasoning
 
-This repository is the shared source, so authorized Kit maintenance changes the shared files here directly. When adopting elsewhere, set the source-version paragraph below to the exact TacT Git commit from which both the entry and `core/` were copied. That paragraph is installation provenance; recording it does not authorize local edits to the shared guidance. The upstream repository and that commit are sufficient; no separate version manifest is needed. The source checkout's own Git commit identifies the snapshot here without a self-referential commit hash in its contents.
+The Kit is also a working prototype through which the developer can articulate engineering thinking and accumulate experience. Explain why a principle was proposed, what problem it responds to, when it applies, and which facts or trade-offs would change the conclusion. Detailed reasoning can help the developer examine their thinking and guide the agent; do not reduce it to conclusions merely to save tokens. This material can inform later Kit design; guidance alone is not expected to solve every engineering problem. Individual tasks read only what helps the current judgment.
 
-## Source version and fallback
+Do not maintain a second account of project structure or code that can be read from the repository. Include implementation context and examples when they explain a judgment. [evolving.md](evolving.md) distinguishes useful experience, exploratory ideas, and confirmed guidance.
 
-Source: [MerlinSMQWQ/TacT](https://github.com/MerlinSMQWQ/TacT), first English split edition, 2026-10-15. Resolve the source snapshot from this checkout's Git commit; adopters record that exact commit when copying.
+## Judge whether it helps
 
-The migration baseline is the complete English `AGENTS.md` supplied for this task, preserved unchanged as [docs/baseline/AGENTS.en.md](https://github.com/MerlinSMQWQ/TacT/blob/main/docs/baseline/AGENTS.en.md). The plan's separately named `AGENTS.en.md` was not present. The supplied file includes the requested revision about scoped conclusions and useful qualifications. The [migration record](https://github.com/MerlinSMQWQ/TacT/blob/main/docs/migration.md) identifies moved, merged, and newly written material.
+Look for actual progress, avoidable rework, proportionate verification, useful interaction, and timely visibility into important trade-offs. A smaller initial context is not evidence of better outcomes. Developer participation in design and learning can itself be valuable; reduce forced supervision without removing that participation.
 
-The baseline is a reference and fallback, not a second set of active instructions. If a regression is suspected, compare a bounded real task from the same starting state and, as far as possible, the same model settings. Restore the baseline entry if needed while retaining current project constraints; ensure their pre-action reading remains explicit. Do not attribute differences to the split after simultaneously changing the principles, model, and task.
-
-## Keep or trim based on use
-
-Judge the Kit by result quality, avoidable rework, attention and maintenance costs, and whether important choices remain visible to the developer. A smaller initial context is not evidence of better engineering outcomes. Record concrete reusable observations in the project layer, without building a complete work log, monitoring system, or evaluation system.
-
-When something goes wrong, distinguish unavailable content, content that did not help judgment, and sound judgment blocked by execution or an external dependency. Improve that layer. Reading all the files is not success if the task still does not advance. Follow [evolving.md](evolving.md) when revising or removing guidance, including returning to a single file if the split costs more than it helps.
+When something goes wrong, distinguish content that was not available, guidance that did not help judgment, and a reasonable judgment blocked by execution or an external dependency. Improve the relevant part. Follow [evolving.md](evolving.md) to revise or remove guidance, including returning to a single file if the split costs more than it helps. Detailed records do not require every task to repeat the full argument or produce a compliance report.

@@ -1,78 +1,79 @@
-# First English edition: migration and local adoption record
+# Source correction and migration record
 
-Date: 2026-10-15. The English split is implemented. The local checks below establish a bounded adoption path; outcome improvements remain under trial. This is a historical migration record, not another runtime instruction set or a second ongoing plan.
+Date: 2026-10-20. The Kit keeps its entry, topic split, and project layer. This revision corrects the incomplete authoring source used for the first migration and restores the missing material. It records source coverage and local checks; improvements in engineering outcomes remain under trial.
 
-## Source and scope
+## Which source was used
 
-The source is the complete English `AGENTS.md` supplied in the TacT workspace. The planning draft names `AGENTS.en.md`, but no separate file with that name existed. The supplied English text contains the requested revision about scoped conclusions and selecting useful qualifications. It was preserved byte-for-byte as [baseline/AGENTS.en.md](baseline/AGENTS.en.md) before editing.
+The first migration used a 40,670-byte, 185-line English file. The file later supplied as `AGENTS.en.md` is identical to that older baseline. After the source mismatch was reported, the same directory was checked and `AGENTS-10.en.md` was found: 61,760 bytes, 241 lines, with the delegation chapter and other additions described in the review feedback. The full text, rather than the feedback summary, is the source of this revision.
 
-Baseline: 40,670 bytes; SHA-256 `54d2395fee6107209cb04e200a37472a3ddc0e3524b2d7899e8565960f29baca`.
+That complete file is preserved byte-for-byte as [baseline/AGENTS.en.md](baseline/AGENTS.en.md). SHA-256: `71a8b089c4b636ec57b16333bd8ea2c1f66a997702c46c012848bafdb2e4a9c2`.
 
-The original workspace tracked only `.gitignore`; the supplied `AGENTS.md` was untracked. Existing ignore rules exclude `plan.md` and `plan/`. The Chinese planning draft remains local discussion material and is not force-added to the English Kit.
+The [first migration record](https://github.com/MerlinSMQWQ/TacT/blob/09dac8487bbf17b99e861f999580be315518a50f/docs/migration.md) and [older baseline](https://github.com/MerlinSMQWQ/TacT/blob/09dac8487bbf17b99e861f999580be315518a50f/docs/baseline/AGENTS.en.md) remain in Git history. Their completeness claims apply only to the older source; they did not establish coverage of the complete authoring draft. The earlier statement that there was no source delegation chapter was true of the file used, not of the full draft.
 
-## Migration map
+The baseline is reference material and a fallback, not a second active entry. The Chinese plan remains local discussion material, excluded by the existing ignore rules. Current reading and maintenance conventions live in the entry, `core/README.md`, `project/README.md`, and `core/evolving.md`.
 
-Source line ranges below refer to the preserved baseline. “Moved” retains the paragraph text; “merged” consolidates shared statements or updates references after the split; “added” identifies material the baseline did not already supply.
+## Coverage of the complete source
 
-| Baseline material | Destination and treatment |
+Line ranges below refer to the current 241-line baseline. Unchanged guidance was retained; additions and changed passages were migrated into the existing topics. The earlier developer-facing additions remain where they still help. In particular, the scoped-conclusion guidance and qualification examples already in `core/communication.md` are retained alongside the full source's communication changes.
+
+| Source section | Destination and treatment |
 | --- | --- |
-| Opening, lines 1–10 | Merged into the entry's goals, hard boundaries, and judgment statement; purpose and maintenance context in `core/README.md` and `core/evolving.md`. |
-| Human control, lines 11–22 | Frequent judgment summarized in the entry; four paragraphs moved to `core/collaboration.md`; correctness, security, integrity, and complexity costs merged into the entry and `core/complexity.md`. |
-| New complexity, lines 23–40 | Moved into `core/complexity.md`, with immediate decisions above the fuller rationale. |
-| Business flow and abstraction, lines 41–52 | Moved into `core/complexity.md`; responsibility, reuse, contract, and navigation trade-offs retained together. |
-| Existing designs, lines 53–66 | Moved into `core/complexity.md`; the final paragraph now names `core/evolving.md` instead of “the final section of this file.” |
-| Investigation and progress, lines 67–90 | Ten substantive paragraphs moved into `core/working.md`; the general anti-ritual statement merged into the entry and a short local explanation. |
-| Tool feedback, lines 91–100 | Designer guidance moved into `core/tools.md`; known-state and recovery boundaries merged with a separately stated caller perspective. |
-| Verification, lines 101–116 | All seven paragraphs moved into `core/verification.md`; concise reporting guidance added and shared truthfulness requirements kept in the entry. |
-| Comments, lines 117–126 | All four paragraphs moved into `core/communication.md`, including the timeout and idempotency example. |
-| Judgments and qualifications, lines 127–154 | Twelve paragraphs moved into `core/communication.md`, including the reasons and both scoped-verification and direct-copy examples; the shared evidence/reporting boundary merged into the entry. |
-| Understandable documentation, lines 155–170 | All seven paragraphs moved into `core/communication.md`, preserving the scope for code identifiers and machine-readable output. |
-| Useful accumulated guidance, lines 171–185 | Moved into `core/evolving.md`; three paragraphs have file-relative wording updated, and project placement is explained in `project/README.md`. |
+| Opening, lines 1–12 | Goals and boundaries in the entry; the Kit's prototype role, value of reasoning, and distinction from a duplicate project inventory in `core/README.md` and `core/evolving.md`. |
+| Human control, lines 13–32 | `core/collaboration.md`: interaction helps form the result; developer participation has value; delivery supports effective review; sufficient evidence is also a stopping condition. The correctness and complexity-cost paragraph remains in `core/complexity.md`; key judgments remain in the entry. |
+| Delegation, lines 33–68 | All 17 body paragraphs in `core/delegation.md`, grouped for navigation. The task-cancellation example, recipient background, proportionate observation, changed premises, integration duties, read-only scope, direct reporting route, independent review, uncertainty, and decision authority are preserved. File-relative references now point to the Kit or the relevant topic. |
+| Complexity, lines 69–88 | `core/complexity.md`, including the new restriction on incidental formatting, renaming, import, and comment changes. A short version is also in the entry. |
+| Business flow and abstraction, lines 89–100 | Retained in `core/complexity.md`, including the reasons for decomposition and the limits of reuse and decoupling. |
+| Existing designs, lines 101–114 | Retained in `core/complexity.md`; the recording reference points to `core/evolving.md`. Settled answers remain reusable while their premises hold. |
+| Investigation and progress, lines 115–144 | `core/working.md`, including the new plan-invalidation paragraph, both unexpected-state paragraphs, and updated intermediate-result guidance. The entry now includes unexpected state as a reading trigger. |
+| Tools, lines 145–162 | `core/tools.md` separates the source's caller and designer duties. The existing concrete status-operation guidance remains useful and is retained. |
+| Verification, lines 163–178 | All seven source paragraphs remain in `core/verification.md`. The expanded truthfulness paragraph from lines 203–204 also lives here, distinguishing executed checks from reasoning about code. |
+| Comments, lines 179–188 | All four paragraphs remain in `core/communication.md`, including the timeout and idempotency example. |
+| Judgments and communication, lines 189–206 | `core/communication.md`, with existing scoped-conclusion and qualification guidance retained. The expanded evidence paragraph is in `core/verification.md`; its shared boundary is summarized in the entry. |
+| Understandable documentation, lines 207–222 | `core/communication.md`, including agent handoffs, the warning against unrelated contrasts, and the distinction between current delivery explanations and records of how principles developed. |
+| Judgment, experience, and constraints, lines 223–241 | `core/evolving.md`: preserve reasoning, applicable conditions, counterexamples, and useful history; retain exploratory ideas without making them instructions; distinguish observation, hypothesis, proposal, and developer confirmation. Project placement is explained in `project/README.md`. |
 
-## Added material
+## Passages reviewed for meaning after adaptation
 
-- The entry's project-reading contract, partial topic supplements, precedence, authority labels, six everyday principles, and action-based topic index implement the planning decisions.
-- `core/README.md` supplies adoption, same-source distribution, source identification, preservation of project content, trimming, fallback, and bounded trials for developers.
-- `core/collaboration.md` adds briefing, observation, intervention, and review from the developer's perspective. It does not turn every agent responsibility into another human supervision task.
-- `core/delegation.md` is newly written from the plan's stated delegation principles. The baseline has no independent delegation section. It covers handoff, ongoing guidance, filtered evidence, integration, and responsibility without adding parallel-edit rules or fixed review ceremonies.
-- `core/tools.md` distinguishes caller recovery from designer feedback. `core/evolving.md` adds project-to-core generalization, acquisition diagnosis, and conditional responses to observed loading or output problems.
-- `project/README.md` explains what takes effect and how to specialize. `project/notes.md` records only the already confirmed first-edition mode and scope. `project/verification.md` applies verification selection to the actual documentation-only TacT repository.
+The source has 106 body paragraphs, excluding headings. A text comparison found 92 unchanged paragraphs in the entry and topic files. The remaining 14 were reviewed individually. Exact matches help locate preserved text; the meaning checks below address the consolidated passages and changed references.
 
-## Meaning checks
-
-A paragraph comparison located the unchanged material and isolated the passages that were consolidated or reworded. Those passages were reviewed against the baseline for conditions and effects, rather than treating an exact-text match as proof of semantic correctness:
-
-- Opening goals and the closing anti-ritual statement remain general judgment guidance. They do not convert all heuristics into prohibitions or approval gates. Safety, authorization, integrity, truthfulness, and scoped restrictions remain explicit in the entry.
-- Consolidating the correctness/security paragraph retains both the non-negotiable boundaries and the requirement to justify maintenance costs even for robustness or extensibility work.
-- Replacing the “final section” reference retains the obligation to preserve reusable confirmed reasons, reuse settled answers, and recheck them when premises change.
-- Splitting caller and tool-designer duties retains unknown-outcome status checks, missing business decisions, known-state limits, and the boundary against promoting external commands into instructions.
-- Moving truthfulness to the entry retains actual-evidence requirements and the effect of later changes on earlier verification. The communication examples remain explanatory counterexamples, not a ban on qualifications.
-- Updating file-relative wording in accumulated-guidance paragraphs preserves the scope for recording confirmed constraints and the ability to remove an unhelpful Kit; project-specific conclusions stay in the project layer.
-
-Conditions that matter remain beside the relevant practices: when verification expands, required merge/release checks, why unknown existing mechanisms need investigation, when an unresolved decision needs a developer answer, and why repeated failures do not automatically justify more rules. The upper parts can guide action without relying on a later exception to correct them.
-
-## Local adoption evidence
-
-The real project is TacT itself. The representative task is this instruction migration, including the choice of verification for a repository with no application code or test suite. No test project, model run, or persistent evaluation framework was added.
-
-| Check | Evidence and supported result |
+| Source lines | How the meaning is retained |
 | --- | --- |
-| Primary working session | The current Codex desktop chat started in TacT with the original project entry supplied in context. After editing, explicit file reads obtained the new entry and project notes, followed by the relevant core files and checks for matching project supplements. This checks the updated guidance in an ongoing session. |
-| Fresh CLI input construction | Local `codex-cli 0.162.1`, launched from the TacT root using `codex debug prompt-input`, exited successfully. A comparison of its rendered input with the exact new entry, including its final paragraph, confirmed the complete entry was present. No model call was made. |
-| Notes acquisition | The CLI startup input did not automatically contain the notes body. The entry explicitly requires reading it. The working session obtained the full `project/notes.md` through a file read before the remaining verification work. |
-| Matching supplement | The working session read `core/verification.md` and the existing `project/verification.md` together. It also checked for matching collaboration, communication, complexity, working, tools, delegation, and evolving supplements; none existed. The project supplement adjusts verification selection without replacing the shared evidence or failure guidance. |
-| Applied judgment | Verification was selected for actual instruction behavior: baseline comparison, boundary and qualification review, local-link and English-content checks, host-input inspection, and project-reading checks. No unrelated application suite or new testing system was invented. The baseline and the existing plan ignore rules were preserved. |
+| 3 | The entry and collaboration topic give delivery and interaction equal weight, retain the maintainer's control, and treat avoidable attention and review costs as part of delivery quality. |
+| 5 | The adoption guide keeps the Kit's prototype role, the value of understanding the developer's engineering thinking, reasons and applicability, and the limits of what guidance alone can solve. Detailed experience is supported in the evolving topic. |
+| 7 | The adoption guide and evolving topic distinguish recoverable project inventories from implementation context and examples needed to explain a judgment. |
+| 9 | The entry retains hard boundaries and scoped restrictions, permission controls, judgment for soft guidance, and the distinction between preserving reasons and repeating the argument on every task. |
+| 11 | The opening principle and goal together retain solving grounded current problems while preserving understanding, review, and the ability to change the system. |
+| 27 | The entry and complexity topic retain correctness, real security, and integrity boundaries, alongside maintenance costs that still apply to robustness or extensibility work. |
+| 55 | “In this file” becomes “in this Kit”; human roles, the direct delegator route, explicit communication arrangements, and the prohibition on delaying or concealing conflicts remain intact. |
+| 57 | “Updates this file” becomes “updates the guidance”; actual edit authority, read-only proposals, and the difference between agent agreement and developer confirmation remain intact. |
+| 59 | The reference to “this file's verification principles” becomes a link to `verification.md`; proportional integration checks, uncertainty, and avoiding both blind trust and wholesale repetition remain intact. |
+| 113 | The recording reference points to `evolving.md`; reusable reasons and constraints, reuse of settled answers, and rechecking changed premises remain intact. |
+| 195 | The communication topic retains cautious language tied to actual uncertainty, direct judgments for discussion and low-risk exploration, one relevant qualification, and consequential risks. The existing more detailed qualification-selection method and examples are preserved. |
+| 225 | “This file” becomes “The Kit”; specific problems, contemporary facts, options, trade-offs, subsequent results, and variable depth remain legitimate experience records. |
+| 229 | The recording reference links to `delegation.md`, with project-specific material kept in the project layer. Confirmed reasons, experiential context, scope, and limits on promoting guesses remain intact. |
+| 241 | “This file and the Kit” becomes “The Kit and its individual files”; both engineering guidance and learning value remain criteria for retention, alongside actual collaboration costs. |
 
-CLI startup construction and the ongoing desktop session are separate evidence. They establish that the entry can be discovered in the checked CLI launch, and that notes and supplements can be acquired and applied in the current real task. They do not establish that a fresh autonomous model run will reliably follow every reading trigger or that every desktop startup path loads the new entry. Those behaviors remain trial questions; a prompt dump alone cannot prove them.
+## Corrections to the Kit's own guidance
 
-Focused document checks passed for all 16 delivered Markdown files and 25 local links, including English content and filenames, the unchanged baseline digest, the planned core layout, shared-file links, and whitespace. No application test suite exists in the current repository.
+- The adopting project's `project/notes.md` now records the upstream repository and copied commit. No shared file needs an installation-specific edit. This removes the conflict between source recording and keeping shared copies unchanged.
+- The entry keeps action-relevant reading rules and boundaries. Detailed setup, distribution, and fallback instructions live in `core/README.md`.
+- The adoption and project guides use direct language for reading files, recording source details, and checking what a tool actually loaded. Tool-specific and dated source records are kept here, outside shared `core/`.
+- The communication trigger now applies before delivery explanations, recommendations, agent handoffs, and code comments. Unexpected state and recording reasoning also have explicit triggers.
 
-The full startup dump stayed in a local temporary file because it may contain unrelated private instructions. The command's installed help and observed output were used for the debug check. The expected discovery behavior was also checked against [official OpenAI documentation](https://developers.openai.com/codex/guides/agents-md); documentation did not substitute for the local observation.
+## Local verification and limits
+
+The representative real task is this source correction. The source-dependent migration paused when the specified file proved to be the older version. A bounded directory check found the full file matching the review's size, line count, and missing chapter. The migration then used its actual text. This is an observed application of investigating unexpected state before continuing dependent work, rather than guessing the missing content or creating a test project.
+
+The working session read current project notes, the relevant core topics, and the existing project verification supplement. The paragraph comparison covered the complete source, and the 14 adapted passages were reviewed for changed conditions, authority, evidence, and scope. Delegation text and the cancellation example come from the original file; no subagents were required to migrate or review the documents.
+
+Focused checks passed for all 16 delivered Markdown files and 28 local links, including English content and filenames, whitespace, the unchanged core layout, the complete baseline's byte match, and source coverage. Shared `core/` files have no local dependency on `docs/`, dated source block, or Codex-specific setup note. There is no application suite in this documentation repository.
+
+A fresh `codex-cli 0.162.1` invocation of `codex debug prompt-input` from the TacT root exited successfully. A comparison with the exact current entry confirmed the full updated text was present, including the final paragraph. Project notes were not automatically included; the entry's explicit read requirement still matters. The current working session read those notes and the matching verification supplement. The full input dump remained in a local temporary file because it can contain unrelated private instructions. No model call was made for this startup check.
+
+These checks establish source coverage, document structure, and the checked CLI input construction. They do not establish the reliability of fresh model-driven reading decisions, every desktop startup path, or improvements in engineering outcomes.
 
 ## Trial handoff
 
-The adopted reading and maintenance conventions now live in `core/README.md`, `project/README.md`, and `core/evolving.md`. The original Chinese plan is retired as an implementation checklist; it remains local reference material rather than a second maintained authority.
+The missing-source correction was not covered by the first migration. Its coverage and local checks are now complete, so the local plan can remain archived as an implementation checklist with its source and completion status corrected; adoption effects remain under trial. Preserve useful observations in the adopting project's existing notes rather than creating a second long-term plan or a monitoring system.
 
-Continue bounded use in one or two real projects. When an observation has reusable value, record the task, behavior, and effect in that project's existing notes, labeling observations and unadopted proposals. Look for actual delivery progress, avoidable rework, proportionate verification, relevant communication, and timely visibility into important trade-offs. Test a fresh model-driven startup and its reading decisions in normal use; do not infer that from the CLI input inspection or this explicitly refreshed session.
-
-If problems appear, first locate unavailable content, unhelpful judgment guidance, or an execution dependency. Compare against the preserved baseline only when a suspected regression warrants it, holding the task, starting state, and model settings as steady as practical. No measured improvement in task quality, context cost, or developer effort is claimed by this first migration.
+Normal use still needs to check whether a fresh agent follows the reading triggers and whether delivery, verification choices, understanding, and useful developer participation improve. Where a concrete regression appears, compare with the appropriate preserved source and hold the task, starting state, and model settings as steady as practical. A source-coverage check alone does not establish those outcomes.
