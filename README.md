@@ -1,6 +1,6 @@
 # TacT Agent Kit
 
-<img src="assets/logo.svg" alt="TacT logo" width="112" height="112">
+<img src="assets/logo.png" alt="TacT logo: a developer and a friendly agent building together" width="320" height="320">
 
 TacT takes its name from *tact*: a sense of proportion and consideration in how people work together. This Agent Kit offers engineering guidance for developers working with agents: better delivery, useful judgment, and interaction that helps the developer observe, learn, and guide important choices.
 
