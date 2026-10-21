@@ -13,7 +13,9 @@ tact init /path/to/project --dry-run
 tact init /path/to/project
 ```
 
-The `init` command installs its bundled Kit into `.tact/` and appends a marked reading instruction to the root `AGENTS.md`. Existing entry text and `.tact/project/` content remain intact. It checks for conflicting shared files before writing and does not upgrade an existing snapshot; use the explicit update procedure below for that. New project notes explain their purpose and ownership and record the package source and version; they do not inherit the TacT source repository's constraints. `.tact/manifest.json` records the package version and shared-file hashes.
+The `init` command installs its bundled Kit into `.tact/`, appends a marked reading instruction to the root `AGENTS.md`, and adds one project-local skill under `.agents/skills/tact/`. Existing entry text, `.tact/project/` content, and other skills remain intact. It checks for conflicting shared files before writing and does not upgrade an existing snapshot; use the explicit update procedure below for that. New project notes explain their purpose and ownership and record the package source and version; they do not inherit the TacT source repository's constraints. `.tact/manifest.json` records the package version and shared-file hashes, including the skill.
+
+The skill is a small entry pointing to this project's Kit. In Codex CLI or the IDE extension, select it with `/skills` or `$tact`; clients with a skill selector can show it as **TacT Agent Kit**. Restart Codex if it has not detected the new files. Keep `AGENTS.md` for normal project instruction loading. Skill discovery, reading the referenced guidance, and applying it to a real task are separate checks.
 
 1. Read the project's existing instructions and review the proposed entry addition. Resolve meaningful conflicts between local guidance and the Kit; the CLI does not interpret or migrate those rules. Record additional confirmed constraints, work mode, and authorization limits in `.tact/project/notes.md` when useful.
 2. Run initialization and review the files before committing them. Repeating initialization with the same Kit preserves existing content and can restore missing files. A different shared snapshot or edited shared file requires a deliberate update; `init` reports the differences and leaves files unchanged.
@@ -42,7 +44,7 @@ tact refresh /path/to/project --dry-run
 tact refresh /path/to/project
 ```
 
-The command uses the manifest's recorded hashes to distinguish unchanged shared files from local edits. A local edit or invalid installation record stops the plan before writes. Already-updated files are accepted, and the manifest is written last so an interrupted update can resume after inspection. Project-owned files remain intact, except that an untouched generated `notes.md` can receive the current introduction and source line. Customized notes are preserved; the manifest remains the authoritative installed-version record. Review the diff before committing.
+The command uses the manifest's recorded hashes to distinguish unchanged shared files from local edits. It also adds the skill to projects initialized before skills were included. A local edit, a conflicting file at a new shared path, or an invalid installation record stops the plan before writes. Already-updated files are accepted, and the manifest is written last so an interrupted update can resume after inspection. Project-owned files remain intact, except that an untouched generated `notes.md` can receive the current introduction and source line. Customized notes are preserved; the manifest remains the authoritative installed-version record. Review the diff before committing.
 
 Projects may intentionally use different versions. Investigate an unknown source, accidental edits to a shared copy, or an entry that no longer matches its topic files. A manually copied Kit without a manifest needs a deliberate manual update rather than a guessed baseline.
 

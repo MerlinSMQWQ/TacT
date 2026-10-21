@@ -130,6 +130,8 @@ def bundled_files() -> tuple[dict[str, bytes], dict[str, bytes]]:
     shared = {
         ".tact/AGENTS.md": kit.joinpath("AGENTS.md").read_bytes(),
         ".tact/LICENSE": kit.joinpath("LICENSE").read_bytes(),
+        ".agents/skills/tact/SKILL.md": kit.joinpath("skills/tact/SKILL.md").read_bytes(),
+        ".agents/skills/tact/agents/openai.yaml": kit.joinpath("skills/tact/agents/openai.yaml").read_bytes(),
     }
     for resource in sorted(kit.joinpath("core").iterdir(), key=lambda item: item.name):
         if resource.is_file() and resource.name.endswith(".md"):
@@ -286,7 +288,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--version", action="version", version=f"%(prog)s {metadata.version(PACKAGE)}")
     commands = parser.add_subparsers(dest="command", required=True)
     for name, help_text in (
-        ("init", "Add the bundled Kit without replacing project guidance."),
+        ("init", "Add the bundled Kit and TacT skill without replacing project guidance."),
         ("refresh", "Refresh project documents from the installed TacT package, preserving custom project guidance."),
     ):
         command = commands.add_parser(name, help=help_text, description=help_text)
@@ -313,7 +315,7 @@ def main(argv: list[str] | None = None) -> int:
             writing = True
             apply_changes(root, changes)
             action = "Refreshed" if args.command == "refresh" else "Initialized"
-            print(f"{action}. Review AGENTS.md and .tact/ before committing them.")
+            print(f"{action}. Review AGENTS.md, .tact/, and .agents/skills/tact/ before committing them.")
         return 0
     except (InitError, OSError) as error:
         print(f"tact: {error}", file=sys.stderr)

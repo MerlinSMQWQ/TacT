@@ -4,7 +4,9 @@ Confirmed source: Use the complete English authoring baseline, preserved in `doc
 
 Confirmed scope: Keep the Markdown entry, topic split, and project layer. Preserve the author's reasoning, conditions, examples, and useful existing additions when filling source gaps. Do not add synchronization, monitoring, an evaluation framework, mandatory project fields, or a Skill for every topic. Continuing trials determine whether the split improves outcomes.
 
-Confirmed scope addition: Provide an installable Python package and a CLI to initialize selected repositories. PyPI is the intended distribution channel. Preserve the existing project's guidance during initialization; adding a Skill is not part of this first implementation.
+Confirmed scope addition: Provide an installable Python package and a CLI to initialize selected repositories. PyPI is the intended distribution channel. Preserve the existing project's guidance during initialization.
+
+Confirmed Skill scope: Add one project-local `tact` Skill through `init` and `refresh`, so users can discover and explicitly invoke the Kit in Codex. Keep it as a thin entry pointing to the project's `.tact/` snapshot, with UI metadata and the existing manifest's protection for local edits. Preserve the normal `AGENTS.md` loading path; do not duplicate the full Kit or create a Skill for every topic.
 
 Confirmed publishing scope: Use the MIT license and publish to PyPI through GitHub Actions with Trusted Publishing. A published GitHub Release triggers publication after package checks; ordinary pushes and pull requests run the checks only. The maintainer does not publish packages manually from a local machine.
 

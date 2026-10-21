@@ -70,10 +70,16 @@ class InitTests(unittest.TestCase):
         for relative, digest in manifest["files"].items():
             self.assertEqual(sha256((self.root / relative).read_bytes()).hexdigest(), digest)
         self.assertIn(".tact/AGENTS.md", (self.root / "AGENTS.md").read_text())
+        skill = self.root / ".agents/skills/tact"
+        for relative in ("SKILL.md", "agents/openai.yaml"):
+            self.assertEqual((skill / relative).read_bytes(), (SOURCE_ROOT / "skills/tact" / relative).read_bytes())
+            self.assertIn(f".agents/skills/tact/{relative}", manifest["files"])
 
     def test_dry_run_shows_entry_diff_and_creates_nothing(self):
         result = self.run_cli("init", "--dry-run")
         self.assertIn("WOULD CREATE .tact/AGENTS.md", result.stdout)
+        self.assertIn("WOULD CREATE .agents/skills/tact/SKILL.md", result.stdout)
+        self.assertIn("WOULD CREATE .agents/skills/tact/agents/openai.yaml", result.stdout)
         self.assertIn("+Before substantive work", result.stdout)
         self.assertEqual(list(self.root.iterdir()), [])
 
@@ -187,6 +193,29 @@ class InitTests(unittest.TestCase):
         self.assertEqual(target.read_text(), "External guidance\n")
         self.assertFalse((self.root / ".tact").exists())
 
+    def test_skill_path_links_cannot_redirect_writes_outside_the_target(self):
+        from tact.cli import bundled_files
+
+        shared, _ = bundled_files()
+        manifest = self.root / ".tact/manifest.json"
+        manifest.parent.mkdir()
+        manifest.write_bytes(shared[".tact/manifest.json"])
+        outside = Path(self.temp.name) / "outside"
+        outside.mkdir()
+        for relative in (".agents", ".agents/skills", ".agents/skills/tact",
+                         ".agents/skills/tact/agents", ".agents/skills/tact/SKILL.md",
+                         ".agents/skills/tact/agents/openai.yaml"):
+            with self.subTest(relative=relative):
+                path = self.root / relative
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.symlink_to(outside, target_is_directory=True)
+                for command in ("init", "refresh"):
+                    before = self.snapshot()
+                    self.assertIn("symbolic links", self.run_cli(command, expected=1).stderr)
+                    self.assertEqual(before, self.snapshot())
+                    self.assertEqual(list(outside.iterdir()), [])
+                path.unlink()
+
     def test_missing_target_or_obstructing_file_is_reported_without_writes(self):
         self.run_cli("init", self.root / "missing", expected=1)
         self.assertEqual(list(self.root.iterdir()), [])
@@ -204,7 +233,8 @@ class InitTests(unittest.TestCase):
 
     def test_installed_markdown_links_resolve(self):
         self.run_cli("init")
-        files = [self.root / "AGENTS.md", *(self.root / ".tact").rglob("*.md")]
+        files = [self.root / "AGENTS.md", *(self.root / ".tact").rglob("*.md"),
+                 *(self.root / ".agents/skills/tact").rglob("*.md")]
         for path in files:
             for destination in re.findall(r"\[[^\]]+\]\(([^)]+)\)", path.read_text()):
                 if "://" not in destination and not destination.startswith("#"):
@@ -218,6 +248,11 @@ class InitTests(unittest.TestCase):
         manifest = json.loads(manifest_path.read_text())
         manifest["version"] = "0.1.0"
         manifest["files"][".tact/core/README.md"] = sha256(old_readme.read_bytes()).hexdigest()
+        # Older releases installed no skill; refresh must add it without a baseline.
+        for relative in list(manifest["files"]):
+            if relative.startswith(".agents/"):
+                (self.root / relative).unlink()
+                del manifest["files"][relative]
         manifest_path.write_text(json.dumps(manifest, indent=2) + "\n")
         # Exact notes emitted by the initial 0.1.0 CLI, before the introduction.
         (self.root / ".tact/project/notes.md").write_text(
@@ -235,12 +270,14 @@ class InitTests(unittest.TestCase):
         before = self.snapshot()
         preview = self.run_cli("refresh", self.root, "--dry-run", cwd=self.temp.name)
         self.assertIn("WOULD UPDATE .tact/core/README.md", preview.stdout)
+        self.assertIn("WOULD CREATE .agents/skills/tact/SKILL.md", preview.stdout)
         self.assertIn("+This file intentionally starts nearly empty", preview.stdout)
         self.assertEqual(before, self.snapshot())
         result = self.run_cli("refresh")
         self.assertIn("Refreshed.", result.stdout)
         self.assertEqual(old_readme.read_bytes(), (SOURCE_ROOT / "core/README.md").read_bytes())
         self.assertEqual(old_readme.stat().st_mode & 0o777, 0o640)
+        self.assertTrue((self.root / ".agents/skills/tact/agents/openai.yaml").is_file())
         notes = (self.root / ".tact/project/notes.md").read_text()
         self.assertIn("project maintainer and agents", notes)
         self.assertIn(f"version `{metadata.version('tact-agent-kit')}`", notes)
@@ -320,6 +357,61 @@ class InitTests(unittest.TestCase):
         self.run_cli("refresh")
         self.assertEqual((self.root / ".tact/core/tools.md").read_bytes(), (SOURCE_ROOT / "core/tools.md").read_bytes())
         self.assertIn("Already initialized", self.run_cli("init").stdout)
+
+    def test_skill_conflicts_stop_init_and_refresh_without_overwriting_other_skills(self):
+        for relative in ("SKILL.md", "agents/openai.yaml"):
+            with self.subTest(relative=relative):
+                self.prepare_older_kit()
+                skill = self.root / ".agents/skills/tact" / relative
+                skill.write_text("Existing custom skill content.\n")
+                other = self.root / ".agents/skills/another/SKILL.md"
+                other.parent.mkdir(parents=True, exist_ok=True)
+                other.write_text("Another project's skill.\n")
+                before = self.snapshot()
+                for command in ("init", "refresh"):
+                    for flags in ((), ("--dry-run",)):
+                        result = self.run_cli(command, *flags, expected=1)
+                        self.assertIn(f".agents/skills/tact/{relative}", result.stderr)
+                        self.assertEqual(before, self.snapshot())
+                skill.unlink()
+                self.run_cli("refresh")
+                self.assertEqual(other.read_text(), "Another project's skill.\n")
+
+    def test_refresh_protects_tracked_skill_edits_and_restores_missing_metadata(self):
+        self.run_cli("init")
+        skill = self.root / ".agents/skills/tact/SKILL.md"
+        original = skill.read_bytes()
+        skill.write_bytes(original + b"\nOur local edit.\n")
+        ui = self.root / ".agents/skills/tact/agents/openai.yaml"
+        ui.unlink()
+        before = self.snapshot()
+        self.assertIn("differs from the recorded installation", self.run_cli("refresh", expected=1).stderr)
+        self.assertEqual(before, self.snapshot())
+        skill.write_bytes(original)
+        self.run_cli("refresh")
+        self.assertTrue(ui.is_file())
+
+    def test_skill_refresh_replaces_only_an_unchanged_recorded_version(self):
+        self.run_cli("init")
+        skill = self.root / ".agents/skills/tact/SKILL.md"
+        skill.write_text("Earlier skill instructions.\n")
+        manifest_path = self.root / ".tact/manifest.json"
+        manifest = json.loads(manifest_path.read_text())
+        manifest["files"][".agents/skills/tact/SKILL.md"] = sha256(skill.read_bytes()).hexdigest()
+        manifest_path.write_text(json.dumps(manifest))
+        self.run_cli("refresh")
+        self.assertEqual(skill.read_bytes(), (SOURCE_ROOT / "skills/tact/SKILL.md").read_bytes())
+
+    def test_skill_links_resolve_to_the_selected_project_from_a_nested_working_directory(self):
+        nested = self.root / "src/nested"
+        nested.mkdir(parents=True)
+        self.run_cli("init", self.root, cwd=nested)
+        skill = self.root / ".agents/skills/tact/SKILL.md"
+        destinations = re.findall(r"\[[^\]]+\]\(([^)]+)\)", skill.read_text())
+        self.assertEqual(
+            {(skill.parent / destination).resolve() for destination in destinations},
+            {(self.root / relative).resolve() for relative in (".tact/AGENTS.md", ".tact/project/notes.md")},
+        )
 
     def test_interrupted_refresh_preserves_the_old_manifest_and_can_resume(self):
         from tact.cli import main

@@ -48,23 +48,34 @@ The project can use any language; it does not need a Python environment. TacT in
 ```text
 your-project/
 ├── AGENTS.md                 # Existing text plus a marked TacT reading instruction
-└── .tact/
-    ├── AGENTS.md             # Shared Kit entry
-    ├── LICENSE               # MIT license for the shared Kit
-    ├── core/                 # Shared topic guidance
-    ├── project/
-    │   ├── README.md         # Guide for project-owned notes and supplements
-    │   └── notes.md          # Project-owned notes, with a short introduction
-    └── manifest.json         # Package version, source URL, and shared-file hashes
+├── .tact/
+│   ├── AGENTS.md             # Shared Kit entry
+│   ├── LICENSE               # MIT license for the shared Kit
+│   ├── core/                 # Shared topic guidance
+│   ├── project/
+│   │   ├── README.md         # Guide for project-owned notes and supplements
+│   │   └── notes.md          # Project-owned notes, with a short introduction
+│   └── manifest.json         # Package version, source URL, and shared-file hashes
+└── .agents/skills/tact/
+    ├── SKILL.md              # Discoverable entry pointing to this project's Kit
+    └── agents/openai.yaml    # Codex UI name, description, and starting prompt
 ```
 
-Review and commit `AGENTS.md` and `.tact/` with your project. Put local constraints and supplements in `.tact/project/`; files already there are preserved. Existing root-level `core/` or `project/` directories are left intact. The root entry tells the agent to read the Kit and project notes before substantive work, and establishes `.tact/` as the base for the Kit's relative paths.
+Review and commit `AGENTS.md`, `.tact/`, and `.agents/skills/tact/` with your project. Put local constraints and supplements in `.tact/project/`; files already there are preserved. Existing root-level `core/` or `project/` directories and other skills are left intact. The root entry tells the agent to read the Kit and project notes before substantive work, and establishes `.tact/` as the base for the Kit's relative paths.
 
 Repeated initialization with the same package leaves matching files untouched and restores missing files. `--dry-run` lists proposed writes and shows the root entry diff without creating files or directories. Existing shared files, version metadata, or a TacT entry block that differ cause initialization to stop with differences for review. There is no implicit upgrade or force-overwrite option.
 
 TacT checks for conflicts before writing. It also rejects symbolic links at managed paths and a nonempty root `AGENTS.override.md`, which would hide the normal entry in Codex. Resolve those conditions explicitly before retrying. If a filesystem error interrupts writing, the command reports that partial files may remain; inspect them before retrying. Matching files are safe to reuse.
 
 Initialization preserves existing instructions but does not interpret conflicts between their meaning and the Kit. Check actual agent loading and behavior using the [adoption guide](https://github.com/MerlinSMQWQ/TacT/blob/main/core/README.md). Installing a newer CLI does not change any initialized project.
+
+## Select TacT as a skill
+
+Starting with version 0.1.3, initialization also installs one project-local `tact` skill. It directs the agent to this project's `.tact/` entry and notes, including when the working directory is a nested folder. The full guidance stays in `.tact/`; the skill is an additional entry alongside the root `AGENTS.md` reading instruction.
+
+In Codex CLI or the IDE extension, use `/skills` or type `$tact` to select it. In clients with a skill selector, look for **TacT Agent Kit**. Codex detects local skills automatically; restart it if the new skill does not appear. The exact selector UI depends on the client; installing a skill does not register a separate built-in `/tact` command. See the [official skill documentation](https://learn.chatgpt.com/docs/build-skills) for discovery locations and invocation.
+
+For a project initialized with an older release, upgrade the installed CLI and run `tact refresh` as shown below to add the skill. Both skill files are tracked by `.tact/manifest.json`, so local edits and conflicting files are reported before any writes. Keep project-specific guidance in `.tact/project/` instead of editing the shared skill. Installing only the skill folder globally is not supported: its links expect the project's `.tact/` snapshot.
 
 ## Refresh an initialized project's documents
 
@@ -105,7 +116,7 @@ uv run --reinstall-package tact-agent-kit python -m unittest discover -s tests -
 uv build
 ```
 
-Edit shared guidance at `AGENTS.md`, `core/`, and `project/README.md`. Hatchling includes these sources in the installed `tact_resources` namespace; no second editable copy is maintained. The source repository's `project/notes.md` and `project/verification.md` are not distributed as adopting-project defaults. When editing guidance during development, reinstall the package to refresh the bundled resource snapshot, including for editable installs.
+Edit shared guidance at `AGENTS.md`, `core/`, and `project/README.md`, and the skill at `skills/tact/`. The skill's relative links target its installed location under `.agents/skills/tact/`. Hatchling includes these sources in the installed `tact_resources` namespace; no second editable copy is maintained. The source repository's `project/notes.md` and `project/verification.md` are not distributed as adopting-project defaults. When editing guidance during development, reinstall the package to refresh the bundled resource snapshot, including for editable installs.
 
 The build produces a source archive and wheel in `dist/`. You can install a built wheel with `uv tool install /absolute/path/to/the.whl`. Both distributions include the MIT license. Initialization and refresh also include it in `.tact/LICENSE` alongside the shared guidance.
 
@@ -125,7 +136,7 @@ Before the first release, enable two-factor authentication on your PyPI account 
 
 Use the `pypi` GitHub environment for this publishing job. No PyPI API token or repository secret is needed. A pending publisher creates the PyPI project on its first successful publication; registering it alone does not reserve the name.
 
-For each release, update the version in `pyproject.toml` and `uv.lock`, commit the intended files, and publish a [GitHub Release](https://github.com/MerlinSMQWQ/TacT/releases/new) with the matching `v` tag, such as `v0.1.2`. The tag must point to the commit containing those files and the workflow. The workflow refuses to publish if the tag differs from the package version. Use a new version for later changed distributions. After the workflow succeeds, verify installation from PyPI with `uv tool install --reinstall tact-agent-kit`.
+For each release, update the version in `pyproject.toml` and `uv.lock`, commit the intended files, and publish a [GitHub Release](https://github.com/MerlinSMQWQ/TacT/releases/new) with the matching `v` tag, such as `v0.1.3`. The tag must point to the commit containing those files and the workflow. The workflow refuses to publish if the tag differs from the package version. Use a new version for later changed distributions. After the workflow succeeds, verify installation from PyPI with `uv tool install --reinstall tact-agent-kit`.
 
 ## License
 
