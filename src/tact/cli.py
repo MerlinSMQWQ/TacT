@@ -127,7 +127,10 @@ def notes_content(version: str, *, introduction: bool = True) -> bytes:
 
 def bundled_files() -> tuple[dict[str, bytes], dict[str, bytes]]:
     kit = resources.files("tact_resources")
-    shared = {".tact/AGENTS.md": kit.joinpath("AGENTS.md").read_bytes()}
+    shared = {
+        ".tact/AGENTS.md": kit.joinpath("AGENTS.md").read_bytes(),
+        ".tact/LICENSE": kit.joinpath("LICENSE").read_bytes(),
+    }
     for resource in sorted(kit.joinpath("core").iterdir(), key=lambda item: item.name):
         if resource.is_file() and resource.name.endswith(".md"):
             shared[f".tact/core/{resource.name}"] = resource.read_bytes()

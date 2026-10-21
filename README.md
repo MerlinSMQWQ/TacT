@@ -24,10 +24,15 @@ TacT takes its name from *tact*: a sense of proportion and consideration in how 
 
 ## Install and initialize
 
-Requires Python 3.11 or newer. The CLI has no runtime dependencies. The distribution name is currently `tact-agent-kit`; the executable is `tact`. PyPI publication is pending, so install from this checkout for now:
+Requires Python 3.11 or newer. The CLI has no runtime dependencies. The distribution name is `tact-agent-kit`; the executable is `tact`. After the first PyPI release, install with:
 
 ```sh
-uv tool install .
+uv tool install tact-agent-kit
+```
+
+Before that release, or when developing locally, install from this checkout with `uv tool install .`. Then preview and initialize a project:
+
+```sh
 tact --version
 
 # Preview first, then initialize an existing project directory.
@@ -45,6 +50,7 @@ your-project/
 ├── AGENTS.md                 # Existing text plus a marked TacT reading instruction
 └── .tact/
     ├── AGENTS.md             # Shared Kit entry
+    ├── LICENSE               # MIT license for the shared Kit
     ├── core/                 # Shared topic guidance
     ├── project/
     │   ├── README.md         # Guide for project-owned notes and supplements
@@ -101,7 +107,29 @@ uv build
 
 Edit shared guidance at `AGENTS.md`, `core/`, and `project/README.md`. Hatchling includes these sources in the installed `tact_resources` namespace; no second editable copy is maintained. The source repository's `project/notes.md` and `project/verification.md` are not distributed as adopting-project defaults. When editing guidance during development, reinstall the package to refresh the bundled resource snapshot, including for editable installs.
 
-The build produces a source archive and wheel in `dist/`. You can install a built wheel with `uv tool install /absolute/path/to/the.whl`. Package naming on PyPI and the project license still need to be settled before publication; this change does not configure publishing workflows.
+The build produces a source archive and wheel in `dist/`. You can install a built wheel with `uv tool install /absolute/path/to/the.whl`. Both distributions include the MIT license. Initialization and refresh also include it in `.tact/LICENSE` alongside the shared guidance.
+
+## Publish a release
+
+GitHub Actions handles publishing through [PyPI Trusted Publishing](https://docs.pypi.org/trusted-publishers/). The [publishing workflow](https://github.com/MerlinSMQWQ/TacT/blob/main/.github/workflows/publish.yml) builds the source distribution and its wheel, checks metadata and README rendering, and runs the CLI tests against the installed wheel. Pushes to `main` and pull requests run these checks. Publishing a GitHub Release also uploads the tested distributions to PyPI; ordinary commits do not publish a package.
+
+Before the first release, enable two-factor authentication on your PyPI account and add a pending publisher in [account Publishing](https://pypi.org/manage/account/publishing/):
+
+| Field | Value |
+| --- | --- |
+| PyPI project name | `tact-agent-kit` |
+| GitHub owner | `MerlinSMQWQ` |
+| Repository | `TacT` |
+| Workflow filename | `publish.yml` |
+| Environment | `pypi` |
+
+Use the `pypi` GitHub environment for this publishing job. No PyPI API token or repository secret is needed. A pending publisher creates the PyPI project on its first successful publication; registering it alone does not reserve the name.
+
+For each release, update the version in `pyproject.toml` and `uv.lock`, commit the intended files, and publish a [GitHub Release](https://github.com/MerlinSMQWQ/TacT/releases/new) with the matching `v` tag, such as `v0.1.2`. The tag must point to the commit containing those files and the workflow. The workflow refuses to publish if the tag differs from the package version. Use a new version for later changed distributions. After the workflow succeeds, verify installation from PyPI with `uv tool install --reinstall tact-agent-kit`.
+
+## License
+
+TacT is distributed under the [MIT License](https://github.com/MerlinSMQWQ/TacT/blob/main/LICENSE).
 
 ## Source and migration
 

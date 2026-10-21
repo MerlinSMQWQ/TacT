@@ -55,6 +55,7 @@ class InitTests(unittest.TestCase):
         self.run_cli("init", self.root, cwd=self.temp.name)
         kit = self.root / ".tact"
         self.assertEqual((kit / "AGENTS.md").read_bytes(), (SOURCE_ROOT / "AGENTS.md").read_bytes())
+        self.assertEqual((kit / "LICENSE").read_bytes(), (SOURCE_ROOT / "LICENSE").read_bytes())
         expected_topics = {path.name for path in (SOURCE_ROOT / "core").glob("*.md")}
         self.assertEqual({path.name for path in (kit / "core").glob("*.md")}, expected_topics)
         for name in expected_topics:
