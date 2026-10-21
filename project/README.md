@@ -6,7 +6,7 @@ This directory belongs to the adopting project. Shared Kit updates must preserve
 
 `notes.md` is read before substantive work. Record confirmed constraints and work mode whose absence would cause repeated misunderstanding, consequential risk, or substantial reinvestigation. State enough of any action-changing restriction here to guide the action; a link alone is insufficient. Longer reasons can live in a topic file.
 
-When copying the Kit, record the source repository and exact commit here. Update that record when the shared files are updated. Do not edit a source-version paragraph in `core/README.md`; the shared copy stays unchanged.
+When copying the Kit manually, record the source repository and exact commit here. The CLI records the source and package version in new notes, with shared-file hashes in the Kit's `manifest.json`. Initialization preserves existing notes. An explicit update may refresh an untouched generated notes template; customized notes remain intact. The manifest records the currently installed package even if custom notes retain an older source line. Update source records when the shared files are updated. Do not edit a source-version paragraph in `core/README.md`; the shared copy stays unchanged.
 
 There is no required form to fill. Start nearly empty when no project constraints are established. Keep code facts in code and ordinary documentation; retain the reasoning and examples needed to explain a decision.
 

@@ -1,2 +1,6 @@
 plan/
 plan.md
+__pycache__/
+*.py[cod]
+.venv/
+dist/
