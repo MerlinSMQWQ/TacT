@@ -35,11 +35,11 @@ Paths in the entry start at the Kit's installation root, even when a task runs f
 
 ## Update or trim the shared files
 
-Update `AGENTS.md` and `core/` together from one package release or one commit. Updating the CLI does not change any initialized project's files. To adopt its bundled snapshot, preview and apply an explicit update:
+Update `AGENTS.md` and `core/` together from one package release or one commit. Updating the CLI does not change any initialized project's files. The `refresh` command applies documents from the installed package to the selected project; it does not download or upgrade the CLI. Preview and apply its bundled snapshot explicitly:
 
 ```sh
-tact update /path/to/project --dry-run
-tact update /path/to/project
+tact refresh /path/to/project --dry-run
+tact refresh /path/to/project
 ```
 
 The command uses the manifest's recorded hashes to distinguish unchanged shared files from local edits. A local edit or invalid installation record stops the plan before writes. Already-updated files are accepted, and the manifest is written last so an interrupted update can resume after inspection. Project-owned files remain intact, except that an untouched generated `notes.md` can receive the current introduction and source line. Customized notes are preserved; the manifest remains the authoritative installed-version record. Review the diff before committing.

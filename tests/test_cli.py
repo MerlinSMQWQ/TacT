@@ -39,7 +39,13 @@ class InitTests(unittest.TestCase):
         }
 
     def test_help_and_version(self):
-        self.assertIn("init", self.run_cli("--help").stdout)
+        help_text = self.run_cli("--help").stdout
+        self.assertIn("init", help_text)
+        self.assertIn("refresh", help_text)
+        self.assertNotIn("update", help_text)
+        self.assertIn("installed TacT package", self.run_cli("refresh", "--help").stdout)
+        self.assertIn("invalid choice", self.run_cli("update", expected=2).stderr)
+        self.assertEqual(self.snapshot(), {})
         self.assertEqual(
             self.run_cli("--version").stdout.strip(),
             f"tact {metadata.version('tact-agent-kit')}",
@@ -220,18 +226,18 @@ class InitTests(unittest.TestCase):
             "The installed shared-file hashes are recorded in `../manifest.json`.\n"
         )
 
-    def test_update_previews_then_upgrades_an_untouched_older_kit(self):
+    def test_refresh_previews_then_upgrades_an_untouched_older_kit(self):
         self.prepare_older_kit()
         old_readme = self.root / ".tact/core/README.md"
         old_readme.chmod(0o640)
-        self.assertIn("tact update --dry-run", self.run_cli("init", expected=1).stderr)
+        self.assertIn("tact refresh --dry-run", self.run_cli("init", expected=1).stderr)
         before = self.snapshot()
-        preview = self.run_cli("update", self.root, "--dry-run", cwd=self.temp.name)
+        preview = self.run_cli("refresh", self.root, "--dry-run", cwd=self.temp.name)
         self.assertIn("WOULD UPDATE .tact/core/README.md", preview.stdout)
         self.assertIn("+This file intentionally starts nearly empty", preview.stdout)
         self.assertEqual(before, self.snapshot())
-        result = self.run_cli("update")
-        self.assertIn("Updated.", result.stdout)
+        result = self.run_cli("refresh")
+        self.assertIn("Refreshed.", result.stdout)
         self.assertEqual(old_readme.read_bytes(), (SOURCE_ROOT / "core/README.md").read_bytes())
         self.assertEqual(old_readme.stat().st_mode & 0o777, 0o640)
         notes = (self.root / ".tact/project/notes.md").read_text()
@@ -241,11 +247,11 @@ class InitTests(unittest.TestCase):
         for relative, digest in manifest["files"].items():
             self.assertEqual(sha256((self.root / relative).read_bytes()).hexdigest(), digest)
         after = self.snapshot()
-        self.assertIn("Already up to date", self.run_cli("update").stdout)
+        self.assertIn("Already up to date", self.run_cli("refresh").stdout)
         self.assertIn("Already initialized", self.run_cli("init").stdout)
         self.assertEqual(after, self.snapshot())
 
-    def test_update_preserves_custom_project_guidance_and_root_entry(self):
+    def test_refresh_preserves_custom_project_guidance_and_root_entry(self):
         self.prepare_older_kit()
         notes = self.root / ".tact/project/notes.md"
         notes.write_bytes(notes.read_bytes() + b"\nConfirmed: preserve our public API.\n")
@@ -256,25 +262,25 @@ class InitTests(unittest.TestCase):
         entry = self.root / "AGENTS.md"
         entry.write_bytes(b"# Local instructions\n\n" + entry.read_bytes())
         before = self.snapshot()
-        self.run_cli("update")
+        self.run_cli("refresh")
         after = self.snapshot()
         for path in (notes, guide, supplement, entry):
             relative = str(path.relative_to(self.root))
             self.assertEqual(before[relative], after[relative])
 
-    def test_update_refuses_local_changes_before_any_writes(self):
+    def test_refresh_refuses_local_changes_before_any_writes(self):
         self.prepare_older_kit()
         path = self.root / ".tact/core/working.md"
         path.write_bytes(path.read_bytes() + b"\nOur local shared-file edit.\n")
         (self.root / ".tact/core/tools.md").unlink()
         before = self.snapshot()
         for flags in [(), ("--dry-run",)]:
-            result = self.run_cli("update", *flags, expected=1)
+            result = self.run_cli("refresh", *flags, expected=1)
             self.assertIn(".tact/core/working.md: differs from the recorded installation", result.stderr)
             self.assertIn("No files changed", result.stderr)
             self.assertEqual(before, self.snapshot())
 
-    def test_update_requires_a_valid_manifest_without_following_its_paths(self):
+    def test_refresh_requires_a_valid_manifest_without_following_its_paths(self):
         self.prepare_older_kit()
         path = self.root / ".tact/manifest.json"
         good = json.loads(path.read_text())
@@ -291,11 +297,11 @@ class InitTests(unittest.TestCase):
                 else:
                     path.write_bytes(content)
                 before = self.snapshot()
-                result = self.run_cli("update", expected=1)
+                result = self.run_cli("refresh", expected=1)
                 self.assertIn("No files changed", result.stderr)
                 self.assertEqual(before, self.snapshot())
 
-    def test_update_does_not_overwrite_an_untracked_file_at_a_new_shared_path(self):
+    def test_refresh_does_not_overwrite_an_untracked_file_at_a_new_shared_path(self):
         self.prepare_older_kit()
         manifest_path = self.root / ".tact/manifest.json"
         manifest = json.loads(manifest_path.read_text())
@@ -303,18 +309,18 @@ class InitTests(unittest.TestCase):
         manifest_path.write_text(json.dumps(manifest))
         (self.root / ".tact/core/tools.md").write_text("Existing content without a recorded baseline.\n")
         before = self.snapshot()
-        self.assertIn("not tracked", self.run_cli("update", expected=1).stderr)
+        self.assertIn("not tracked", self.run_cli("refresh", expected=1).stderr)
         self.assertEqual(before, self.snapshot())
 
-    def test_update_restores_missing_files_and_accepts_already_updated_files(self):
+    def test_refresh_restores_missing_files_and_accepts_already_updated_files(self):
         self.prepare_older_kit()
         (self.root / ".tact/core/README.md").write_bytes((SOURCE_ROOT / "core/README.md").read_bytes())
         (self.root / ".tact/core/tools.md").unlink()
-        self.run_cli("update")
+        self.run_cli("refresh")
         self.assertEqual((self.root / ".tact/core/tools.md").read_bytes(), (SOURCE_ROOT / "core/tools.md").read_bytes())
         self.assertIn("Already initialized", self.run_cli("init").stdout)
 
-    def test_interrupted_update_preserves_the_old_manifest_and_can_resume(self):
+    def test_interrupted_refresh_preserves_the_old_manifest_and_can_resume(self):
         from tact.cli import main
 
         self.prepare_older_kit()
@@ -329,11 +335,11 @@ class InitTests(unittest.TestCase):
 
         errors = io.StringIO()
         with mock.patch.object(Path, "replace", fail_manifest_replace), redirect_stdout(io.StringIO()), redirect_stderr(errors):
-            self.assertEqual(main(["update", str(self.root)]), 1)
+            self.assertEqual(main(["refresh", str(self.root)]), 1)
         self.assertIn("some files may have been created or updated", errors.getvalue())
         self.assertEqual(manifest_path.read_bytes(), previous_manifest)
         self.assertEqual((self.root / ".tact/core/README.md").read_bytes(), (SOURCE_ROOT / "core/README.md").read_bytes())
-        self.run_cli("update")
+        self.run_cli("refresh")
         self.assertIn("Already initialized", self.run_cli("init").stdout)
 
 

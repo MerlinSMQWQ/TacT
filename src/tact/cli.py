@@ -239,11 +239,11 @@ def plan_changes(root: Path, *, update: bool = False) -> list[Change]:
     if conflicts:
         message = (
             "Some shared files have local changes or no recorded baseline. "
-            "Keep those changes for review; update will not overwrite them."
+            "Keep those changes for review; refresh will not overwrite them."
             if update else
             "Existing TacT shared files or version metadata differ from this package. "
             "init does not upgrade or overwrite a Kit. From the target project, run "
-            "'tact update --dry-run' to preview an update that checks for local changes."
+            "'tact refresh --dry-run' to preview document changes from the installed package."
         )
         raise InitError(message + "\n\n" + "\n\n".join(conflicts))
     return changes
@@ -279,14 +279,14 @@ def apply_changes(root: Path, changes: list[Change]) -> None:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(prog="tact", description="Initialize or update a repository's TacT Agent Kit.")
+    parser = argparse.ArgumentParser(prog="tact", description="Initialize or refresh a project's TacT documents from the installed package.")
     parser.add_argument("--version", action="version", version=f"%(prog)s {metadata.version(PACKAGE)}")
     commands = parser.add_subparsers(dest="command", required=True)
     for name, help_text in (
         ("init", "Add the bundled Kit without replacing project guidance."),
-        ("update", "Update an installed Kit after checking for local changes."),
+        ("refresh", "Refresh project documents from the installed TacT package, preserving custom project guidance."),
     ):
-        command = commands.add_parser(name, help=help_text)
+        command = commands.add_parser(name, help=help_text, description=help_text)
         command.add_argument("path", nargs="?", default=".", help="Existing project directory (default: current directory).")
         command.add_argument("--dry-run", action="store_true", help="Preview changes without writing files.")
     args = parser.parse_args(argv)
@@ -295,21 +295,21 @@ def main(argv: list[str] | None = None) -> int:
         root = Path(args.path).expanduser().resolve()
         if not root.is_dir():
             raise InitError(f"{root}: target must be an existing directory.")
-        changes = plan_changes(root, update=args.command == "update")
-        print(f"TacT {metadata.version(PACKAGE)} in {root}")
+        changes = plan_changes(root, update=args.command == "refresh")
+        print(f"TacT documents from package {metadata.version(PACKAGE)} in {root}")
         if not changes:
-            print("Already up to date; no files changed." if args.command == "update" else "Already initialized; no files changed.")
+            print("Already up to date; no files changed." if args.command == "refresh" else "Already initialized; no files changed.")
         elif args.dry_run:
             for change in changes:
                 relative = change.path.relative_to(root).as_posix()
                 print(f"WOULD {change.action} {relative}")
-                if args.command == "update" or relative == "AGENTS.md":
+                if args.command == "refresh" or relative == "AGENTS.md":
                     print(show_diff(relative, change.before, change.after))
             print("Dry run complete; no files changed.")
         else:
             writing = True
             apply_changes(root, changes)
-            action = "Updated" if args.command == "update" else "Initialized"
+            action = "Refreshed" if args.command == "refresh" else "Initialized"
             print(f"{action}. Review AGENTS.md and .tact/ before committing them.")
         return 0
     except (InitError, OSError) as error:

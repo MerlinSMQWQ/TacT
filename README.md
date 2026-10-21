@@ -60,24 +60,24 @@ TacT checks for conflicts before writing. It also rejects symbolic links at mana
 
 Initialization preserves existing instructions but does not interpret conflicts between their meaning and the Kit. Check actual agent loading and behavior using the [adoption guide](https://github.com/MerlinSMQWQ/TacT/blob/main/core/README.md). Installing a newer CLI does not change any initialized project.
 
-## Update an initialized project
+## Refresh an initialized project's documents
 
-After installing a newer CLI, update a project's snapshot explicitly:
+`tact refresh` applies the documents bundled with the installed TacT package to a selected project. It does not download or upgrade the CLI. After installing a newer package, refresh a project's snapshot explicitly:
 
 ```sh
 # Reinstall from your TacT checkout while developing locally.
 uv tool install --reinstall /path/to/TacT
 tact --version
 
-tact update /path/to/project --dry-run
-tact update /path/to/project
+tact refresh /path/to/project --dry-run
+tact refresh /path/to/project
 ```
 
-`update` compares each shared file with its recorded installation hash in `.tact/manifest.json`. Files that still match that baseline can be replaced with the bundled version. A file already matching the new bundle is also accepted, allowing an interrupted update to resume. Local changes or an untracked file occupying a new shared path stop the entire plan before any writes; the command shows the differences for review. A missing or invalid manifest also stops the update. Files missing from the new package require manual review; this command does not remove them automatically.
+`refresh` compares each shared file with its recorded installation hash in `.tact/manifest.json`. Files that still match that baseline can be replaced with the bundled version. A file already matching the new bundle is also accepted, allowing an interrupted refresh to resume. Local changes or an untracked file occupying a new shared path stop the entire plan before any writes; the command shows the differences for review. A missing or invalid manifest also stops the refresh. Files missing from the new package require manual review; this command does not remove them automatically.
 
 Project guidance is preserved. The only existing project file refreshed automatically is `notes.md` when it exactly matches a known untouched generated template, including the original source-only template. This adds the introduction and refreshes its version line. Once notes have been edited, they remain unchanged; the manifest is the authoritative record of the currently installed package, even if custom notes retain an older source line.
 
-The preview shows all proposed file differences. Replacements are atomic per file, with the manifest written last. The entire update is not a filesystem transaction: if a write fails, inspect the reported partial changes before retrying. Repeating a completed update makes no changes.
+The preview shows all proposed file differences. Replacements are atomic per file, with the manifest written last. The entire refresh is not a filesystem transaction: if a write fails, inspect the reported partial changes before retrying. Repeating a completed refresh makes no changes.
 
 ## Find your way
 
