@@ -1,0 +1,4 @@
+interface:
+  display_name: "TacT Agent Kit"
+  short_description: "Apply this project’s TacT collaboration and delivery guidance"
+  default_prompt: "Use $tact to apply this project’s collaboration and delivery guidance to the current task."
