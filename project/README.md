@@ -26,7 +26,7 @@ These labels show what takes effect; they are not a template. Unverified ideas a
 
 ## Add a topic file when needed
 
-When the agent reads `core/<topic>.md`, it also checks for and reads a matching `project/<topic>.md`. The project file adjusts only the parts it explicitly addresses. Other core guidance remains applicable. Confirmed project agreements may narrow boundaries or change soft defaults; greater specificity alone cannot relax hard boundaries.
+When the agent reads `core/<topic>.md`, it also checks for and reads a matching `project/<topic>.md`. The project file adjusts only the parts it explicitly addresses. Other core guidance remains applicable. Confirmed project agreements may narrow boundaries or change adjustable strong defaults and soft defaults; greater specificity alone cannot relax hard boundaries. Strong defaults are a high-priority subset of everyday judgment principles, not a separate authority layer. Within the host's instruction hierarchy and hard boundaries, the developer's explicit agreement in the current task takes precedence over a conflicting project record.
 
 Create a supplement only for a useful adjustment. Keep action-changing restrictions in `notes.md` even when the details live elsewhere. Before relying on module-level instruction files, check when the primary tool actually reads them.
 

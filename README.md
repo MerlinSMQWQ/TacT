@@ -22,6 +22,8 @@
 
 TacT takes its name from *tact*: a sense of proportion and consideration in how people work together. It gives engineering delivery and the developer's interaction experience equal weight. The agent should advance the work and provide evidence, while the developer can observe, learn, and guide important choices when they still matter.
 
+Step size groups work around an outcome that can be understood and checked. Adjust it to the dependencies, uncertainty, and the developer's intended participation, so useful work can continue and important choices remain open for discussion. The entry also summarizes frequent collaboration and communication judgments as adjustable strong defaults. Follow them while active; the developer can adjust them through existing project guidance or task discussion within the Kit's hard boundaries. Ordinary steps do not require a new approval or configuration form.
+
 ## Install and initialize
 
 Requires Python 3.11 or newer. The CLI has no runtime dependencies. The distribution name is `tact-agent-kit`; the executable is `tact`. After the first PyPI release, install with:
@@ -117,6 +119,8 @@ uv build
 ```
 
 Edit shared guidance at `AGENTS.md`, `core/`, and `project/README.md`, and the skill at `skills/tact/`. The skill's relative links target its installed location under `.agents/skills/tact/`. Hatchling includes these sources in the installed `tact_resources` namespace; no second editable copy is maintained. The source repository's `project/notes.md` and `project/verification.md` are not distributed as adopting-project defaults. When editing guidance during development, reinstall the package to refresh the bundled resource snapshot, including for editable installs.
+
+This repository also adopts TacT through the marked block at the end of its root `AGENTS.md`. The CLI omits that exact trailing block from the installed shared entry so it does not point into a nonexistent `.tact/.tact/` directory; the adopting project's root loading block remains in place.
 
 The build produces a source archive and wheel in `dist/`. You can install a built wheel with `uv tool install /absolute/path/to/the.whl`. Both distributions include the MIT license. Initialization and refresh also include it in `.tact/LICENSE` alongside the shared guidance.
 

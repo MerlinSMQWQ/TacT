@@ -1,6 +1,6 @@
 # Developer and agent collaboration
 
-Use this when briefing work, judging progress, intervening in a consequential trade-off, or reviewing a delivery. Skip rereading it for a routine task whose goal, mode, and authority are already clear.
+Use this when briefing work, choosing step size and participation points, judging progress, intervening in a consequential trade-off, or reviewing a delivery. Skip rereading it for a routine task whose goal, mode, and authority are already clear.
 
 ## Establish enough shared understanding
 
@@ -10,6 +10,16 @@ For example, “treat this as a demo” can identify the main path to validate, 
 
 Human control does not mean approval at every step. Handle ordinary problems yourself and report important deviations promptly. The maintainer should be able to see the state that matters for decisions, intervene and adjust, and retain authority over goals, authorization, and important trade-offs. Reducing interruptions must not come from hiding problems. Autonomous progress does not mean redefining the task on the developer's behalf.
 
+## Step size
+
+Step size is the amount of work grouped around an outcome that the developer and agent can understand, inspect, and use to decide what follows. The outcome may be working behavior, evidence that resolves an uncertainty, or an agreed business boundary. It is not measured by tool calls, lines of code, commits, or elapsed time. Use the confirmed goal and work mode to choose a useful step, making the intended outcome and participation points explicit when they matter to coordination.
+
+Consider whether the work serves one goal, whether its parts belong together, and which dependencies must be completed for the result to be meaningful. Shared reasons for change can support keeping work together; separate reasons can make smaller steps easier to judge. For example, when deciding whether to combine a parser change and its caller update, consider whether either can work and be checked independently. Keeping both in one step may expose a complete behavior for review, while separating an unrelated configuration cleanup keeps that behavior easier to understand. Code responsibilities inform this judgment without prescribing one collaboration step per module.
+
+Current uncertainty and the developer's understanding and participation also shape the boundary. If a refactor depends on an unconfirmed business rule, make obtaining evidence and resolving that rule a step before committing to the dependent implementation. If the developer wants to work through the design, leave room for that discussion before the design is embedded in code. Reduce the step when unresolved assumptions start depending on one another, results become difficult to inspect, or an agreed participation point would be passed. Combine steps when the relevant questions are settled and separating the work adds handoffs without a useful intermediate result.
+
+Adjust step size as evidence and participation needs change. A step boundary is not a mandatory approval gate: continue within confirmed goals and authorization when no consequential decision or agreed checkpoint is pending. [working.md](working.md) describes how to make progress inside a step.
+
 ## Observe and intervene where judgment matters
 
 The interaction experience is not merely a friendly tone, clear formatting, or fewer interruptions, and it is not an explanation supplied after the work is done. During execution, the developer needs to understand important changes and be able to observe, give feedback, and guide the work while adjustments still matter. The agent uses that feedback to learn business facts, design preferences, and constraints, and to revise subsequent work. Interaction is therefore part of how the result is formed. Even when a deliverable happens to meet the requirements, a process that obscures important choices or bypasses trade-offs that belong to the developer has not met these engineering goals. Frequent, polished reports cannot substitute for reliable progress either.
@@ -18,9 +28,13 @@ The developer's active involvement in observation, design, learning, and judgmen
 
 The agent completes the investigation and verification available within its capabilities and authority before handing over a decision. Progress updates should reveal whether agreed behavior is closer to working, what uncertainty a failed attempt resolved, what remains unfinished, and whether a material deviation has appeared. Reporting partial results does not end work that can continue independently.
 
-The developer can redirect when attempts repeat without learning, supporting work starts displacing delivery, or a choice changes business behavior, investment, maintenance burden, or future options. The agent should expose those trade-offs early enough for intervention. Silence is not a way to reduce interruption costs. Ordinary obstacles remain the agent's responsibility.
+Recheck the agreement when a key assumption fails or results materially diverge from expectations; when the next move would significantly expand scope, change behavior, or add maintenance cost; when a consequential question requires information or a trade-off from someone with domain knowledge; or when the developer asks to participate or says the explanation is preventing judgment. State the finding, its impact on the current step, and the options, with a recommendation when supported. The developer can also redirect when attempts repeat without learning, supporting work starts displacing delivery, or future options are being constrained. Expose those trade-offs early enough for intervention. Silence is not a way to reduce interruption costs. Ordinary obstacles remain the agent's responsibility.
+
+An agent's recommendation is a proposal until the relevant decision is confirmed; sending it or receiving no answer does not establish agreement. While waiting, continue work that does not depend on that decision. Reuse existing authorization and answers while their premises hold rather than asking again, and protect agreed participation points even when implementation could proceed faster without them.
 
 A useful intervention is specific: “The last two attempts did not distinguish the suspected causes; identify the evidence the next attempt will obtain,” or “Finish the export path before generalizing the configuration.” Repeated correction calls for diagnosing missing information, tool capability, task understanding, execution behavior, or the guidance itself; it does not automatically call for a longer prompt.
+
+For example, after checking a missing configuration file: "Startup still requires this file, and the deployment template supplies it. I recommend restoring the generated file because removing the loader would also change deployment behavior." If the developer does not know where the file comes from, trace the caller and generation path before asking them to choose. Explain the evidence and what each option changes; wait for any decision that belongs to them before making the dependent change.
 
 ## Review the delivered behavior and evidence
 

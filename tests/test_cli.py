@@ -54,7 +54,10 @@ class InitTests(unittest.TestCase):
     def test_initializes_specified_project_with_bundled_sources(self):
         self.run_cli("init", self.root, cwd=self.temp.name)
         kit = self.root / ".tact"
-        self.assertEqual((kit / "AGENTS.md").read_bytes(), (SOURCE_ROOT / "AGENTS.md").read_bytes())
+        source_entry = (SOURCE_ROOT / "AGENTS.md").read_bytes()
+        shared_rules = source_entry.partition(b"\n<!-- tact:begin -->")[0]
+        self.assertEqual((kit / "AGENTS.md").read_bytes(), shared_rules)
+        self.assertNotIn(b"<!-- tact:begin -->", (kit / "AGENTS.md").read_bytes())
         self.assertEqual((kit / "LICENSE").read_bytes(), (SOURCE_ROOT / "LICENSE").read_bytes())
         expected_topics = {path.name for path in (SOURCE_ROOT / "core").glob("*.md")}
         self.assertEqual({path.name for path in (kit / "core").glob("*.md")}, expected_topics)
@@ -305,6 +308,27 @@ class InitTests(unittest.TestCase):
         for path in (notes, guide, supplement, entry):
             relative = str(path.relative_to(self.root))
             self.assertEqual(before[relative], after[relative])
+
+    def test_refresh_removes_source_adoption_block_from_shared_entry(self):
+        from tact.cli import ENTRY
+
+        self.run_cli("init")
+        shared_entry = self.root / ".tact/AGENTS.md"
+        expected_rules = shared_entry.read_bytes()
+        root_entry = (self.root / "AGENTS.md").read_bytes()
+        shared_entry.write_bytes(expected_rules + b"\n" + ENTRY.encode())
+        manifest_path = self.root / ".tact/manifest.json"
+        manifest = json.loads(manifest_path.read_text())
+        manifest["files"][".tact/AGENTS.md"] = sha256(shared_entry.read_bytes()).hexdigest()
+        manifest_path.write_text(json.dumps(manifest))
+
+        self.run_cli("refresh")
+
+        self.assertEqual(shared_entry.read_bytes(), expected_rules)
+        self.assertEqual((self.root / "AGENTS.md").read_bytes(), root_entry)
+        updated = json.loads(manifest_path.read_text())
+        self.assertEqual(updated["files"][".tact/AGENTS.md"], sha256(expected_rules).hexdigest())
+        self.assertIn("Already up to date", self.run_cli("refresh").stdout)
 
     def test_refresh_refuses_local_changes_before_any_writes(self):
         self.prepare_older_kit()

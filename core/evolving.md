@@ -26,7 +26,7 @@ Subject new rules to the same scrutiny as new code: what problem do they address
 
 ## Use bounded trials to locate the problem
 
-Record the task, observed behavior, effect, and reasoning when they help reuse a judgment or explain how a principle developed. Distinguish content not obtained, content obtained but unhelpful, and a reasonable judgment blocked by tools or external dependencies. Reading self-reports are clues; available prompt and tool records give stronger evidence that the content was read, while task outcomes show whether it helped.
+Record the task, observed behavior, effect, and reasoning when they help reuse a judgment or explain how a principle developed. Include only discussions, deviations, feedback, and results that actually occurred; do not fill in events that a trial did not encounter. Distinguish content not obtained, content obtained but unhelpful, and a reasonable judgment blocked by tools or external dependencies. Reading self-reports are clues; available prompt and tool records give stronger evidence that the content was read, while task outcomes show whether it helped. A principle being mentioned in a log does not by itself establish that it affected the action or improved the result.
 
 During a trial, a temporary one-line report of which Kit files were read may help diagnosis. Remove that request when its diagnostic value ends. If topic files repeatedly need to be assigned manually, inspect the entry and actual loading path before adding more prose. Use native path rules, explicit invocation, or Skill packaging only when the primary tool's capabilities and an observed problem justify it.
 

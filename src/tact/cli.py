@@ -127,8 +127,10 @@ def notes_content(version: str, *, introduction: bool = True) -> bytes:
 
 def bundled_files() -> tuple[dict[str, bytes], dict[str, bytes]]:
     kit = resources.files("tact_resources")
+    # This repository's own adoption block would point inside .tact/.tact/ in a shared entry.
+    shared_entry = kit.joinpath("AGENTS.md").read_bytes().removesuffix(b"\n" + ENTRY.encode())
     shared = {
-        ".tact/AGENTS.md": kit.joinpath("AGENTS.md").read_bytes(),
+        ".tact/AGENTS.md": shared_entry,
         ".tact/LICENSE": kit.joinpath("LICENSE").read_bytes(),
         ".agents/skills/tact/SKILL.md": kit.joinpath("skills/tact/SKILL.md").read_bytes(),
         ".agents/skills/tact/agents/openai.yaml": kit.joinpath("skills/tact/agents/openai.yaml").read_bytes(),

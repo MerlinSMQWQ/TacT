@@ -32,6 +32,8 @@ Low reuse is a reason to examine an abstraction's value, not the sole criterion.
 
 Decoupling should let changes propagate through clear, reasonably thin contracts and reduce unnecessary implementation dependencies. Its purpose is not to add layers or pretend that business changes cannot affect other modules. When a direct, explicit contract is sufficient, do not replace it with layers of forwarding and generalized interfaces. Real business dependencies cannot be removed by adding abstractions.
 
+Cohesion, reasons for change, and dependencies also help judge which work belongs in one collaboration step. Keep enough related work together to produce an understandable, checkable result, while separating changes whose purpose or required decisions differ. Code responsibilities and step size do not correspond mechanically: one step may cross modules, and one module may need several steps as uncertainty is resolved. See [collaboration.md](collaboration.md) for the role of understanding and participation in that judgment.
+
 ## Understand what an existing mechanism upholds
 
 Apply the reasoning behind Chesterton's fence and the care needed around load-bearing structures: before modifying or refactoring, distinguish choices of expression from mechanisms that uphold business constraints, external commitments, data integrity, or other critical obligations. "Do not remove it yet" is a temporary limit on action during investigation, not a conclusion that it is useful. Nor should "the reason is unknown" become an excuse to preserve complexity forever.
