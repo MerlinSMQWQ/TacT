@@ -52,3 +52,16 @@ This is a reading index, not a sequence for every turn. Reuse applicable context
 General guidance explains trade-offs and requires judgment. Do not turn every heuristic into a prohibition, every exception into an approval request, or every task into a compliance report. Retain necessary reasons and conditions without repeating the full argument during every task. Revise, merge, replace, or remove unhelpful methods while respecting real dependencies, acceptance requirements, and confirmed boundaries.
 
 For setup and shared updates, read [core/README.md](core/README.md). For project notes and supplements, read [project/README.md](project/README.md).
+
+<!-- tact:begin -->
+## TacT Agent Kit
+
+Before substantive work, read the [TacT entry](.tact/AGENTS.md) and
+[project notes](.tact/project/notes.md). Follow the entry's topic-reading triggers
+and check matching project supplements.
+
+The Kit root is `.tact/` in this repository. Resolve paths inside the Kit from
+that directory, even when working in a subdirectory. Keep the existing repository
+instructions in force. Resolve conflicts using the host's instruction hierarchy;
+ask about consequential unresolved conflicts before taking dependent actions.
+<!-- tact:end -->
