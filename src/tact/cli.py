@@ -15,12 +15,32 @@ PACKAGE = "tact-agent-kit"
 SOURCE = "https://github.com/MerlinSMQWQ/TacT"
 BEGIN = "<!-- tact:begin -->"
 END = "<!-- tact:end -->"
-ENTRY = f"""{BEGIN}
+# The exact entry emitted before communication became required on the first turn.
+# Only an explicit refresh may migrate this known template.
+LEGACY_ENTRY = f"""{BEGIN}
 ## TacT Agent Kit
 
 Before substantive work, read the [TacT entry](.tact/AGENTS.md) and
 [project notes](.tact/project/notes.md). Follow the entry's topic-reading triggers
 and check matching project supplements.
+
+The Kit root is `.tact/` in this repository. Resolve paths inside the Kit from
+that directory, even when working in a subdirectory. Keep the existing repository
+instructions in force. Resolve conflicts using the host's instruction hierarchy;
+ask about consequential unresolved conflicts before taking dependent actions.
+{END}
+"""
+ENTRY = f"""{BEGIN}
+## TacT Agent Kit
+
+Before your first response in each new session, read the [TacT entry](.tact/AGENTS.md),
+[project notes](.tact/project/notes.md), and
+[communication guidance](.tact/core/communication.md). Also read
+`.tact/project/communication.md` if it exists. This applies to short questions
+and casual conversation as well as engineering work; do not defer it until a
+substantive task. Reuse their current contents if already supplied in this
+session; otherwise read the files. Follow the entry's remaining topic-reading
+triggers and check matching project supplements.
 
 The Kit root is `.tact/` in this repository. Resolve paths inside the Kit from
 that directory, even when working in a subdirectory. Keep the existing repository
@@ -81,7 +101,7 @@ def show_diff(relative: str, before: bytes | None, after: bytes) -> str:
     return "\n".join(lines)
 
 
-def entry_content(before: bytes | None) -> bytes:
+def entry_content(before: bytes | None, *, update: bool = False) -> bytes:
     if before is None:
         return ENTRY.encode("utf-8")
     try:
@@ -93,7 +113,19 @@ def entry_content(before: bytes | None) -> bytes:
         if normalized.count(BEGIN) != 1 or normalized.count(END) != 1:
             raise InitError("AGENTS.md has incomplete or duplicate TacT markers.")
         start, end = normalized.index(BEGIN), normalized.index(END) + len(END)
-        if normalized[start:end] != ENTRY.rstrip("\n"):
+        block = normalized[start:end]
+        if block == LEGACY_ENTRY.rstrip("\n"):
+            if not update:
+                raise InitError(
+                    "The TacT block uses an older template. init does not upgrade it. "
+                    "Run 'tact refresh --dry-run' to preview the update."
+                )
+            raw_start = before.index(BEGIN.encode())
+            raw_end = before.index(END.encode()) + len(END)
+            newline = b"\r\n" if b"\r\n" in before[raw_start:raw_end] else b"\n"
+            replacement = ENTRY.rstrip("\n").encode().replace(b"\n", newline)
+            return before[:raw_start] + replacement + before[raw_end:]
+        if block != ENTRY.rstrip("\n"):
             raise InitError(
                 "The TacT block in AGENTS.md differs from this version. "
                 "Review it before installing or updating.\n"
@@ -229,9 +261,12 @@ def plan_changes(root: Path, *, update: bool = False) -> list[Change]:
             changes.append(Change(root / relative, before, content))
 
     before = read_target(root, "AGENTS.md")
-    after = entry_content(before)
+    after = entry_content(before, update=update)
     if before != after:
-        changes.append(Change(root / "AGENTS.md", before, after, append=True))
+        changes.append(Change(
+            root / "AGENTS.md", before, after,
+            append=before is not None and after.startswith(before),
+        ))
 
     relative = ".tact/manifest.json"
     before = read_target(root, relative)

@@ -14,6 +14,21 @@ from unittest import mock
 
 SOURCE_ROOT = Path(__file__).resolve().parents[1]
 
+# Historical installation fixture; keep independent of the current CLI template.
+LEGACY_ENTRY = """<!-- tact:begin -->
+## TacT Agent Kit
+
+Before substantive work, read the [TacT entry](.tact/AGENTS.md) and
+[project notes](.tact/project/notes.md). Follow the entry's topic-reading triggers
+and check matching project supplements.
+
+The Kit root is `.tact/` in this repository. Resolve paths inside the Kit from
+that directory, even when working in a subdirectory. Keep the existing repository
+instructions in force. Resolve conflicts using the host's instruction hierarchy;
+ask about consequential unresolved conflicts before taking dependent actions.
+<!-- tact:end -->
+"""
+
 
 class InitTests(unittest.TestCase):
     def setUp(self):
@@ -73,6 +88,7 @@ class InitTests(unittest.TestCase):
         for relative, digest in manifest["files"].items():
             self.assertEqual(sha256((self.root / relative).read_bytes()).hexdigest(), digest)
         self.assertIn(".tact/AGENTS.md", (self.root / "AGENTS.md").read_text())
+        self.assertIn(".tact/core/communication.md", (self.root / "AGENTS.md").read_text())
         skill = self.root / ".agents/skills/tact"
         for relative in ("SKILL.md", "agents/openai.yaml"):
             self.assertEqual((skill / relative).read_bytes(), (SOURCE_ROOT / "skills/tact" / relative).read_bytes())
@@ -83,7 +99,7 @@ class InitTests(unittest.TestCase):
         self.assertIn("WOULD CREATE .tact/AGENTS.md", result.stdout)
         self.assertIn("WOULD CREATE .agents/skills/tact/SKILL.md", result.stdout)
         self.assertIn("WOULD CREATE .agents/skills/tact/agents/openai.yaml", result.stdout)
-        self.assertIn("+Before substantive work", result.stdout)
+        self.assertIn("+Before your first response", result.stdout)
         self.assertEqual(list(self.root.iterdir()), [])
 
     def test_preserves_existing_guidance_bytes_and_project_files(self):
@@ -152,10 +168,11 @@ class InitTests(unittest.TestCase):
     def test_modified_entry_block_is_preserved_and_reported(self):
         self.run_cli("init")
         entry = self.root / "AGENTS.md"
-        entry.write_text(entry.read_text().replace("Before substantive work", "Only when asked"))
+        entry.write_text(entry.read_text().replace("Before your first response", "Only when asked"))
         before = self.snapshot()
-        self.assertIn("TacT block", self.run_cli("init", expected=1).stderr)
-        self.assertEqual(before, self.snapshot())
+        for command in ("init", "refresh"):
+            self.assertIn("TacT block", self.run_cli(command, expected=1).stderr)
+            self.assertEqual(before, self.snapshot())
 
     def test_invalid_markers_do_not_create_a_partial_kit(self):
         for content in ["<!-- tact:begin -->", "<!-- tact:end -->", "<!-- tact:begin -->" * 2,
@@ -309,6 +326,51 @@ class InitTests(unittest.TestCase):
             relative = str(path.relative_to(self.root))
             self.assertEqual(before[relative], after[relative])
 
+    def test_refresh_migrates_legacy_entry_preserving_surroundings_and_newlines(self):
+        self.run_cli("init")
+        current_template = (self.root / "AGENTS.md").read_bytes()
+        for newline in (b"\n", b"\r\n"):
+            with self.subTest(newline=newline):
+                self.prepare_older_kit()
+                entry = self.root / "AGENTS.md"
+                current = current_template.replace(b"\n", newline)
+                prefix = "# Local instructions 项目\n\n".encode().replace(b"\n", newline)
+                suffix = b"\nKeep this local rule; no final newline.".replace(b"\n", newline)
+                entry.write_bytes(prefix + LEGACY_ENTRY.encode().replace(b"\n", newline) + suffix)
+                entry.chmod(0o640)
+                supplement = self.root / ".tact/project/communication.md"
+                supplement.write_bytes(b"# Our communication preferences\nUse plain language.\n")
+                before = self.snapshot()
+
+                self.assertIn("tact refresh --dry-run", self.run_cli("init", expected=1).stderr)
+                self.assertEqual(before, self.snapshot())
+                preview = self.run_cli("refresh", "--dry-run")
+                self.assertIn("WOULD UPDATE AGENTS.md", preview.stdout)
+                self.assertIn("[communication guidance](.tact/core/communication.md)", preview.stdout)
+                self.assertEqual(before, self.snapshot())
+
+                self.run_cli("refresh")
+                self.assertEqual(entry.read_bytes(), prefix + current + suffix)
+                self.assertEqual(entry.stat().st_mode & 0o777, 0o640)
+                self.assertEqual(self.snapshot()[".tact/project/communication.md"],
+                                 before[".tact/project/communication.md"])
+                after = self.snapshot()
+                self.assertIn("Already up to date", self.run_cli("refresh").stdout)
+                self.assertIn("Already initialized", self.run_cli("init").stdout)
+                self.assertEqual(after, self.snapshot())
+
+    def test_refresh_preserves_customized_legacy_entry_before_any_writes(self):
+        self.prepare_older_kit()
+        entry = self.root / "AGENTS.md"
+        entry.write_text(LEGACY_ENTRY.replace("Before substantive work", "Only when asked"))
+        (self.root / ".tact/core/tools.md").unlink()
+        before = self.snapshot()
+        for flags in ((), ("--dry-run",)):
+            result = self.run_cli("refresh", *flags, expected=1)
+            self.assertIn("TacT block", result.stderr)
+            self.assertIn("No files changed", result.stderr)
+            self.assertEqual(before, self.snapshot())
+
     def test_refresh_removes_source_adoption_block_from_shared_entry(self):
         from tact.cli import ENTRY
 
@@ -434,13 +496,18 @@ class InitTests(unittest.TestCase):
         destinations = re.findall(r"\[[^\]]+\]\(([^)]+)\)", skill.read_text())
         self.assertEqual(
             {(skill.parent / destination).resolve() for destination in destinations},
-            {(self.root / relative).resolve() for relative in (".tact/AGENTS.md", ".tact/project/notes.md")},
+            {(self.root / relative).resolve() for relative in (
+                ".tact/AGENTS.md", ".tact/project/notes.md", ".tact/core/communication.md",
+            )},
         )
 
     def test_interrupted_refresh_preserves_the_old_manifest_and_can_resume(self):
         from tact.cli import main
 
         self.prepare_older_kit()
+        entry = self.root / "AGENTS.md"
+        expected_entry = entry.read_bytes()
+        entry.write_text(LEGACY_ENTRY)
         manifest_path = self.root / ".tact/manifest.json"
         previous_manifest = manifest_path.read_bytes()
         real_replace = Path.replace
@@ -456,6 +523,7 @@ class InitTests(unittest.TestCase):
         self.assertIn("some files may have been created or updated", errors.getvalue())
         self.assertEqual(manifest_path.read_bytes(), previous_manifest)
         self.assertEqual((self.root / ".tact/core/README.md").read_bytes(), (SOURCE_ROOT / "core/README.md").read_bytes())
+        self.assertEqual(entry.read_bytes(), expected_entry)
         self.run_cli("refresh")
         self.assertIn("Already initialized", self.run_cli("init").stdout)
 

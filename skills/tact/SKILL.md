@@ -7,10 +7,13 @@ description: Apply the project's TacT Agent Kit when the user asks to use TacT o
 
 Use the TacT snapshot installed in this project to guide the current task.
 
-Read the [TacT entry](../../../.tact/AGENTS.md) and
-[project notes](../../../.tact/project/notes.md), reusing current guidance already
-supplied by the host. Follow the entry's topic-reading triggers and read matching
-project supplements when present.
+On first use in a session, before responding, read the [TacT entry](../../../.tact/AGENTS.md),
+[project notes](../../../.tact/project/notes.md), and
+[communication guidance](../../../.tact/core/communication.md), along with
+`../../../.tact/project/communication.md` if present. This includes short questions
+and casual conversation. Reuse their current contents if already supplied in
+this session; otherwise read the files. Follow the entry's remaining topic-reading
+triggers and read matching project supplements when present.
 
 This skill is installed at `.agents/skills/tact/SKILL.md`. Resolve the links above
 from this file's directory, even when working in a nested folder. The Kit root is

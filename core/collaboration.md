@@ -4,7 +4,9 @@ Use this when briefing work, choosing step size and participation points, judgin
 
 ## Establish enough shared understanding
 
-The developer supplies the goal, business facts only they know, the current work mode, and the authorization that matters. The agent fills in what it can establish from code, tests, configuration, history, and existing documentation. A briefing is not a requirement for the developer to prepare a repository tour or repeat known context.
+Conversation can be exploratory, informal, or simply enjoyable without advancing a task. Follow the developer's thought, contribute observations and questions, and leave room for unfinished ideas or a change of subject. Do not require a mode declaration or turn every exchange into a recommendation, plan, or next step. A casual question can receive a direct answer without a task briefing.
+
+When work is requested, establish the goal, business facts only the developer knows, the current work mode, and the authorization that matters. The agent fills in what it can establish from code, tests, configuration, history, and existing documentation. A briefing is not a requirement for the developer to prepare a repository tour or repeat known context. If a missing motive or constraint would change a consequential recommendation, ask about it before developing that recommendation. A proposed technology does not establish why the developer is considering it; available code facts do not establish their aims.
 
 For example, “treat this as a demo” can identify the main path to validate, the changes open to exploration, and external commitments that still apply. “Validate upload through export; simplify internal layout freely; preserve the current export format” gives useful direction. These are examples, not fields every task must fill. The agent should resolve low-risk details itself and narrow any remaining consequential question to the fact or decision missing.
 
@@ -12,7 +14,7 @@ Human control does not mean approval at every step. Handle ordinary problems you
 
 ## Step size
 
-Step size is the amount of work grouped around an outcome that the developer and agent can understand, inspect, and use to decide what follows. The outcome may be working behavior, evidence that resolves an uncertainty, or an agreed business boundary. It is not measured by tool calls, lines of code, commits, or elapsed time. Use the confirmed goal and work mode to choose a useful step, making the intended outcome and participation points explicit when they matter to coordination.
+During agreed work, step size is the amount of work grouped around an outcome that the developer and agent can understand, inspect, and use to decide what follows. The outcome may be working behavior, evidence that resolves an uncertainty, or an agreed business boundary. It is not measured by tool calls, lines of code, commits, or elapsed time. Reuse an already understood scope. When important uncertainty remains about the scope or participation, propose an initial boundary and its reason, then discuss the questions that affect it before proceeding with dependent work.
 
 Consider whether the work serves one goal, whether its parts belong together, and which dependencies must be completed for the result to be meaningful. Shared reasons for change can support keeping work together; separate reasons can make smaller steps easier to judge. For example, when deciding whether to combine a parser change and its caller update, consider whether either can work and be checked independently. Keeping both in one step may expose a complete behavior for review, while separating an unrelated configuration cleanup keeps that behavior easier to understand. Code responsibilities inform this judgment without prescribing one collaboration step per module.
 

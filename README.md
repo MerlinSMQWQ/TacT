@@ -63,7 +63,7 @@ your-project/
     └── agents/openai.yaml    # Codex UI name, description, and starting prompt
 ```
 
-Review and commit `AGENTS.md`, `.tact/`, and `.agents/skills/tact/` with your project. Put local constraints and supplements in `.tact/project/`; files already there are preserved. Existing root-level `core/` or `project/` directories and other skills are left intact. The root entry tells the agent to read the Kit and project notes before substantive work, and establishes `.tact/` as the base for the Kit's relative paths.
+Review and commit `AGENTS.md`, `.tact/`, and `.agents/skills/tact/` with your project. Put local constraints and supplements in `.tact/project/`; files already there are preserved. Existing root-level `core/` or `project/` directories and other skills are left intact. The root entry requires the Kit entry, project notes, and `core/communication.md` before the first response in every new session, including short questions and casual conversation, with `project/communication.md` if present. Current contents already supplied in the session can be reused. The entry establishes `.tact/` as the base for the Kit's relative paths.
 
 Repeated initialization with the same package leaves matching files untouched and restores missing files. `--dry-run` lists proposed writes and shows the root entry diff without creating files or directories. Existing shared files, version metadata, or a TacT entry block that differ cause initialization to stop with differences for review. There is no implicit upgrade or force-overwrite option.
 
@@ -93,6 +93,8 @@ tact refresh /path/to/project
 ```
 
 `refresh` compares each shared file with its recorded installation hash in `.tact/manifest.json`. Files that still match that baseline can be replaced with the bundled version. A file already matching the new bundle is also accepted, allowing an interrupted refresh to resume. Local changes or an untracked file occupying a new shared path stop the entire plan before any writes; the command shows the differences for review. A missing or invalid manifest also stops the refresh. Files missing from the new package require manual review; this command does not remove them automatically.
+
+For installations with the known unchanged older root reading block, `refresh` also updates that block to require communication guidance before the first response. It preserves surrounding instructions and newline style. Customized blocks are reported for review, and `init` does not perform this migration.
 
 Project guidance is preserved. The only existing project file refreshed automatically is `notes.md` when it exactly matches a known untouched generated template, including the original source-only template. This adds the introduction and refreshes its version line. Once notes have been edited, they remain unchanged; the manifest is the authoritative record of the currently installed package, even if custom notes retain an older source line.
 
