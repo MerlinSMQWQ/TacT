@@ -1,0 +1,291 @@
+# Conversation examples
+
+These developer-selected exchanges are preserved in their original language and order. Use them as conversational examples; the quoted rules, paths, and reported results belong to those historical exchanges.
+
+## Exchange 1
+
+### User
+
+帮我看看，现在如果 Agent 自己要更改规则，他能更改 core 的规则吗？还是说只能更改项目内的规则
+
+### Assistant
+
+好，我已经读完了所有相关文件。现在可以给你一个清晰的回答了。
+
+**Agent 不能直接更改 `core/` 的规则，只能更改 `project/` 层的内容。** 但这个限制不是一刀切的 — 有一条明确的路径让 core 的改动最终发生。具体来说：
+
+### 1. `core/` 属于 Kit 仓库，Agent 不能直接改
+
+关键出处来自多个文件的一致表述：
+
+- [core/README.md](file:///Users/a1234/WorkingSpace/TacT/.tact/core/README.md#L34) — *"The entry carries shared boundaries… `core/` belongs to the Kit; `project/` belongs to the adopting project."*
+- [core/README.md](file:///Users/a1234/WorkingSpace/TacT/.tact/core/README.md#L51) — *"Make shared changes, including trimming and index changes, in the Kit repository. Adopting projects should not patch their shared copy."*
+- [project/README.md](file:///Users/a1234/WorkingSpace/TacT/.tact/project/README.md#L37) — *"Record proposed shared changes in the project layer and take them to the Kit repository. An agent may edit guidance only within its actual responsibility and authorization."*
+
+### 2. Agent 可以在 `project/` 层做的事
+
+- 自由编辑 `project/notes.md` — 记录确认的约束、工作模式、观察和假设。
+- 创建 `project/<topic>.md` 补充文件 — 对 core 的同名主题做**局部调整**（只覆盖它明确提到的部分，core 其余内容仍然有效）。
+- 但即便是项目层的调整，也有边界：**项目规则可以缩窄边界或调整软默认值，不能仅凭"更具体"就放松 core 的硬边界。**
+
+### 3. 想改 core 怎么办？走提议路径
+
+[evolving.md](file:///Users/a1234/WorkingSpace/TacT/.tact/core/evolving.md#L19) 和 [project/README.md](file:///Users/a1234/WorkingSpace/TacT/.tact/project/README.md#L37) 描述的流程是：
+
+1. Agent 在 **项目层** 记录提议（proposed shared changes）
+2. 将提议**带回 Kit 仓库**（即 TacT 源仓库）处理
+3. 如果需要改开发者确认过的约束，要**获得相应授权**，不能以"自我改进"的名义自行放松边界
+
+[delegation.md](file:///Users/a1234/WorkingSpace/TacT/.tact/core/delegation.md#L37) 进一步明确：一个只读调查者或没有编辑授权的 Agent，应该把提议传递给它的直接委托方，而不是自己直接改。**Agent 之间达成一致不等于开发者确认了这个变更。**
+
+
+设计意图很清楚：core 是**共享的、版本化的**，属于 Kit 仓库；Agent 在采用项目里直接改 core 等于"patch 自己的共享副本"，会导致后续更新冲突和版本漂移。所以改动路径是提议 → Kit 仓库 → 统一更新到各采用项目。
+
+---
+
+## Exchange 2
+
+### User
+
+[tact%20%E8%AF%A6%E7%BB%86%E6%89%A7%E8%A1%8C%E8%AE%A1%E5%88%92.md](file;file:///Users/a1234/WorkingSpace/TacT/tact%20%E8%AF%A6%E7%BB%86%E6%89%A7%E8%A1%8C%E8%AE%A1%E5%88%92.md) 这里有一份详细的下一版本迭代计划，对这份计划你觉得有什么不合理的吗？
+
+### Assistant
+
+Analyzed tact 详细执行计划.md:L1-157
+
+为了准确评审，我需要对照当前 Kit 的实际内容，特别是 `collaboration.md`、`communication.md`、`working.md` 和 `complexity.md`，看看计划中描述的"改动位置"是否与现有结构对得上。
+
+Analyzed collaboration.md:L1-41
+Analyzed communication.md:L1-59
+Analyzed working.md:L1-45
+Analyzed complexity.md:L1-55
+Analyzed README.md:L1-147
+Analyzed verification.md:L1-31
+
+Now I have a thorough understanding of the plan and the current Kit state. Let me write up my review.
+
+Created tact-plan-review.md
+
+完整评审写在了 [tact-plan-review.md](file:///Users/a1234/.gemini/antigravity/brain/f2b58f78-741e-46d0-9310-9d0a86e1f6cd/tact-plan-review.md)。这里说最关键的三个问题：
+
+**1. Strong defaults 和现有指引大量重叠，定位需要更明确。** 6 条条目中的每一条都能在现有 `AGENTS.md` 或主题文件中找到对应段落。如果不说清楚它们是"从已有指引中提取的高频摘要"还是"新增的独立约束"，Agent 会面临同一件事在两处用不同措辞描述的歧义。
+
+**2. 五层优先级体系可能过度工程化。** 现有 3 层（硬边界 → 项目覆盖 → 日常判断）已经足够清晰。把"任务约定"和"可调强约束"作为独立层级插进来，实际执行中很难区分，建议简化。
+
+**3. Pi 特定内容不应写入 `core/README.md` 和根 `README.md`。** 这两个都是共享文件，每个 `tact init` 的项目都会收到。Pi 验收环境的声明放在 `project/notes.md` 和 `project/verification.md` 就够了（计划中也安排了这两处，是对的）。
+
+其他几个问题（步长 5 维度表有成为必填模板的风险、communication 反模式和现有段落大量重叠、复盘维度缺少阅读负担考量等）细节都在评审文档里。
+
+### Attached review document
+
+# TacT 迭代计划评审
+
+对照 Kit 现有内容（`0.1.3`，commit `6cb61ef`）逐项审查后，以下是我认为需要注意的问题，按严重程度排列。
+
+---
+
+## 一、结构性问题
+
+### 1. "Adjustable strong defaults" 和现有 AGENTS.md 职能重叠，定位需要更明确
+
+计划在 AGENTS.md 中新增 `## Adjustable strong defaults` 章节，包含 6 条条目。但对照现有内容：
+
+| 新条目 | 现有覆盖 |
+|---|---|
+| Honor existing agreements | `Read project constraints before acting` 已涵盖 |
+| Discuss consequential unknowns with evidence | `Boundaries and authority` 段落 + `collaboration.md` 的 intervene 段 |
+| Re-align on drift | `working.md` 的 "retire a plan" + `collaboration.md` 的 intervene |
+| Protect agreed participation | `collaboration.md` 的 "human control" + "observe and intervene" |
+| Keep communication direct and readable | `communication.md` 大部分已覆盖 |
+| Report grounded results | `Boundaries and authority` 的 truthful reporting + `verification.md` |
+
+**问题**：这 6 条是对已有指引的**摘要/升级**，不是新增行为。如果不清楚它们和现有段落的关系（是替代、提取、还是增加约束力），Agent 执行时会面临"这段和那段说的是同一件事但措辞不同"的歧义，增加阅读负担而非减少。
+
+> [!IMPORTANT]
+> **建议**：明确每条 strong default 是**从哪个现有段落提取**的精炼表述，以及提升为 strong default 后原段落是否保留原状。考虑在 strong defaults 章节开头加一句说明，比如 "These distill the most frequently needed judgments from the topic files; the full reasoning remains in those files."
+
+### 2. 五层优先级体系可能过度工程化
+
+计划引入了 5 级裁决顺序：硬边界 → 任务约定 → 项目覆盖 → 可调强约束 → 软原则。当前 Kit 的层级其实只有 3 层（硬边界 → 项目层覆盖 → 日常判断原则），已经在 `AGENTS.md` 和 `project/README.md` 中一致表述。
+
+**问题**：
+- "任务约定"和"项目覆盖"之间的优先级在实践中很难分清。如果对话中约定了某事，然后 `project/notes.md` 有不同说法，Agent 需要裁决——但这种冲突本身就说明有人忘了同步，优先级规则帮不了忙。
+- "可调强约束"夹在项目层和软原则之间，位置尴尬。如果项目层可以覆盖它，它比项目层弱；如果不能，它就是变相的硬边界。
+
+> [!TIP]
+> **建议**：保持现有 3 层结构，把 strong defaults 定位为 **"日常判断原则中的高优先子集"**，而非独立的第 4 层。任务约定不需要排入层级——它本身就是开发者当场行使授权的行为，天然高于项目层记录。
+
+---
+
+## 二、落地细节问题
+
+### 3. `collaboration.md` 的步长 5 维度表有成为必填模板的风险
+
+计划要求嵌入一个 **5 维度判断表**（目标与内聚、依赖与完整性、变化原因、当前不确定性、理解与参与）。计划自己也注了"不把 5 维度写成必填表单"，但问题是：
+
+- 现有 `collaboration.md` 的 `Establish enough shared understanding` 段落风格完全是**叙述+举例**，突然嵌入一个维度表会改变文件的调性。
+- Agent 对结构化列表有很强的"逐项填写"倾向，即使你说了不要求填写，表格的存在本身就是压力。
+
+> [!WARNING]
+> **建议**：用叙述体描述步长判断的考量因素，把维度作为行内举例而非表格呈现。或者把表格放在一个具体的示例场景中（"例如在判断是否合并两步时，可以考虑……"），而不是作为独立的结构化节。
+
+### 4. `communication.md` 的反模式条目与现有段落大量重叠
+
+计划 0.3 中的 7 条表达约束，对照 `communication.md` 现有内容：
+
+- "结论前置" → 已有："lead with the best-supported judgment"
+- "单次聚焦当前决策" → 已有："Answer the current question directly"
+- "给出合理默认方案" → 已有："offer a recommendation when supported"
+- "禁用格言体" → 已有："do not perform enthusiasm"、"natural, complete, familiar language"
+- "按需解释" → 已有："do not reteach familiar basics"
+- "同步吸收纠正" → 已有："incorporate the confirmed correction and continue"
+- "无元输出" → 已有："without producing a separate language self-review or compliance report"
+
+**问题**：绝大部分不是新增行为，而是用中文技术协作视角重新措辞。如果以"合并进 `Make the explanation understandable`"的方式落地，这个段落会膨胀很多，但增加的指导价值有限。
+
+> [!TIP]
+> **建议**：只合并现有段落确实没有覆盖到的具体场景（比如"否定排比"这个反模式确实比现有措辞更具体），对于已有覆盖的条目，考虑**修订现有措辞使其更精确**，而不是追加一组平行描述。
+
+### 5. `core/README.md` 中明确 Pi 为验收环境是否合适？
+
+计划要求在 `Set up a project` 中明确"本轮运行与验收环境为 Pi"。但 `core/README.md` 是**共享文件**，属于 Kit 仓库，所有采用项目都会收到。
+
+**问题**：Pi 是你的当前宿主，不是所有 TacT 用户的宿主。把它写进 `core/README.md` 意味着每个 `tact init` 的项目都会看到"验收环境为 Pi"，这不合理。
+
+> [!CAUTION]
+> **建议**：Pi 验收环境的声明应该只出现在 `project/notes.md` 和 `project/verification.md`（计划中也有这两处，是对的）。`core/README.md` 保持宿主无关，最多说 "verify loading in your host environment" 这类通用表述。计划对 `core/README.md` 的修改应限于淡化 Codex 专属操作（这是对的）和说明 strong defaults 机制（也是对的），但不要加入 Pi 特定内容。
+
+### 6. `README.md`（仓库根）中提及 Pi 同理
+
+仓库根 `README.md` 面向的是所有 TacT 的潜在用户和贡献者。把"Pi 为当前运行与验收环境"写入 README 同样不合适，这是项目层的信息。
+
+---
+
+## 三、流程与验证问题
+
+### 7. 阶段 2 和阶段 3 之间缺少明确的"规则冻结"节点
+
+阶段 2 是打包回归验证，阶段 3 是 Pi 实测。但计划没有明确：从阶段 3 实测中发现的问题，应该怎样回流到阶段 1 的规则？如果 3.4 的复盘结论是"某条 strong default 需要修改"，整个循环是 3→1→2→3 还是 3→4？
+
+**建议**：在阶段 3 和阶段 4 之间明确：复盘结论如果涉及 core 规则的实质修改，回到阶段 1 的相应条目修订，然后只需重跑阶段 2 的测试（不需要完整重做阶段 3 的实验），再进入阶段 4。
+
+### 8. 阶段 3.1 的"三层加载核对"很好，但缺少失败处理
+
+计划要求分别核对入口发现、文档读取、行为影响——这个分层很精确。但如果第 1 层（入口发现）就失败了，计划只说"记录并按需适配入口"，没有说什么程度的适配是允许的。
+
+如果 Pi 不加载根 `AGENTS.md` 的 `<!-- tact:begin -->` 块也不加载 `.agents/skills/tact/SKILL.md`，那么需要的可能是一个新的入口路径——这可能涉及新增文件或修改现有文件的结构，超出了"不为每个主题单独拆分 Skill"的范围边界。
+
+**建议**：补充一条判断标准：如果 Pi 的入口发现需要的适配仅限于调整现有入口文件的位置或格式（如把 skill 路径改到 Pi 识别的位置），则在阶段 3 内处理；如果需要根本性的新机制（如新增配置文件、改变 Kit 结构），则升级为范围变更讨论。
+
+### 9. 阶段 3.4 的复盘表格缺少"阅读负担"维度
+
+复盘表格列了 5 个观察问题，都聚焦于新增机制是否有效。但本轮最大的风险不是机制无效，而是**入口文件膨胀后 Agent 的阅读和遵守成本是否值得**。
+
+现在 `AGENTS.md` 是 54 行。加入 strong defaults 章节后估计会到 70-80 行。对于每次对话都要读的入口文件来说，这个增长需要验证是否带来了相应的行为改善。
+
+**建议**：在复盘表中加一个维度："入口文件增长后，Agent 是否仍能在首次读取时形成正确的工作判断，还是出现了忽略或机械遵守的倾向？"
+
+---
+
+## 四、值得肯定的设计
+
+以下几点设计在我看来是正确的，不需要修改：
+
+1. **阶段 0 中"运行时 Kit 保持纯英文"的原则** — 避免了中英混杂的阅读负担。
+2. **"合并修订现有章节"而非追加新段落** — 和 `evolving.md` 的精神一致。
+3. **阶段 3.2 选择较大规模重构实验** — 比小任务探针更能暴露步长协作的真实问题。
+4. **"只记录实际发生的讨论，未出现的事件不补写"** — 直接回应了 Agent 编造复盘的倾向。
+5. **范围边界（明确不做）** — 清晰且务实。
+6. **不修改 `delegation.md`、`tools.md`、`verification.md`** — 范围控制得当。
+
+---
+
+## 总结
+
+最主要的 3 个问题：
+
+1. **Strong defaults 和现有指引的关系不清** — 需要明确它们是摘要提取还是新增约束，否则会造成重复和歧义。
+2. **5 层优先级过度工程化** — 建议简化为 3 层 + "高优先子集"。
+3. **Pi 特定内容不应进入共享文件** — `core/README.md` 和根 `README.md` 中的 Pi 引用应移至项目层。
+
+其他问题（步长表格调性、communication 重叠、复盘维度缺失）是优化项，不阻塞但值得考虑。
+
+---
+
+## Exchange 3
+
+### User
+
+我这边已经执行好了，你来帮我核对一下，是否和计划出现偏移
+
+### Assistant
+
+我已对当前分支的提交（commit `c6cb1ee`）以及工作区变更进行了逐文件、逐条款的详细核对，并运行了完整的单元测试与文档合规检查。
+
+### 总体结论
+
+**没有出现违背计划的偏离，所有约定的规则修订、结构约束与禁区要求均已严格落实。** 此外，你还在工程实现上主动发现并修复了一处 TacT 自举采用（Dogfooding）时的入口块打包边界问题，整体改动非常规范、严密。
+
+---
+
+### 一、计划要点逐项核对
+
+#### 1. 规则层级与强约束（`AGENTS.md`、`project/README.md`）
+* **层级结构**：维持了清晰的三层体系（硬边界 → 项目层覆盖 → 日常判断原则），明确指出当前任务中开发者的当场约定天然高于项目记录，未引入冗余的中间优先级层。
+* **可调强约束**：在 `AGENTS.md` 中以 `## Adjustable strong defaults` 独立呈现，开头明确标注其为“主题文件中高频判断的精炼摘要”，6 条核心条目完整且英文措辞严谨。
+* **索引触发词**：`When to read what` 成功补入步长选择、参与点、单步推进、共同思考、汇报改动与纠偏表达等触发词。
+* **禁区检查**：底部的 `<!-- tact:begin -->` 块完好保留。
+
+#### 2. 步长与介入机制（`core/collaboration.md`、`core/complexity.md`）
+* **步长考量**：在 `## Step size` 小节中，以叙述体配合 parser/caller 场景化示例深入阐述了目标内聚、完整性、变化原因、不确定性与参与时机，**避免了机械结构化表格可能带来的表单化/模板化倾向**。
+* **介入四触发条件**：在 `Observe and intervene` 中清晰落地（关键假设失效、扩范围/增维护成本、需领域决策、使用者要求参与/指出解释障碍）。
+* **非阻塞推进**：明确了 Agent 建议在获得确认前仅为提议，等待期间继续推进无依赖工作，不设统一审批门禁。
+* **衔接与禁区**：`complexity.md` 末尾平滑补充了步长与职责划分的衔接段落；保留了原 `Why human control is part of delivery quality` 完整论述。
+
+#### 3. 表达与汇报规范（`core/communication.md`）
+* **反模式具体化**：明确指出了“否定排比（`not A, not B, but C`）”、“嵌套假设清单（先列一串再声明只看第 1 题）”、“格言体/对仗/翻译腔”等工程反模式。
+* **反查方案污染**：准确补充了 **“当指出表达不合适或误解时，除调整表达外，还须反查误解是否已污染当前方案的前提或选择”**（补全了之前讨论的核心细节）。
+* **汇报四要素**：收束为实际变化、重要选择、验证依据、后续影响，明确了“测试通过”需说明覆盖行为，未运行/受阻/失败需区分报告，并附有地道的简短示例。
+* **禁区检查**：未引入生硬禁用词表，保留了决策注释与资质声明的原有章节。
+
+#### 4. 单步推进与共同思考（`core/working.md`、`core/evolving.md`）
+* **单步小推进**：定义“小”为减少同时依赖的未确认假设，而非机械限制工具调用数、代码行数或耗时。
+* **调查 vs 思考分工**：能自行查清的事实不反复提问；复杂调查时暴露未决问题、受影响选择和下一步证据。
+* **真实复盘留痕**：`evolving.md` 明确只记录实际发生的讨论与偏差，未出现的事件不补写，提到某原则不等于产生效果。
+
+#### 5. 宿主解耦与分层设计（`core/README.md`、`README.md`、`project/notes.md`、`project/verification.md`）
+* **共享指引宿主无关**：`core/README.md` 与根目录 `README.md` 中严格未出现 Pi 等特定宿主名称，淡化了 Codex 专属操作，保持了通用性。
+* **验收口径收敛在项目层**：Pi 作为本轮验收环境、QYCC 作为重构项目、三层加载验证要求、以及 Agent 当前只交付阶段 0–2 的责任边界，全部准确记录在 `project/notes.md` 与 `project/verification.md` 中。
+* **禁区检查**：`core/delegation.md`、`core/tools.md`、`core/verification.md`、`skills/tact/SKILL.md` 均未触碰。
+
+---
+
+### 二、计划外的积极优化（无不良偏离）
+
+1. **打包自举入口死循环修复**（`src/tact/cli.py` & `tests/test_cli.py`）：
+   * **问题**：TacT 自身根目录也通过 `<!-- tact:begin -->` 块采用了 TacT。如果将根目录 `AGENTS.md` 原样作为共享资源打包进 `.tact/AGENTS.md`，会导致被采用项目里的 `.tact/AGENTS.md` 尾部也出现该块，指向不存在的 `.tact/.tact/` 路径。
+   * **修复**：在 `bundled_files()` 中自动剥离了尾部的 `ENTRY` 块，并在根目录 `README.md` 进行了技术说明，同时新增了单元测试 `test_refresh_removes_source_adoption_block_from_shared_entry`。这一改动非常优雅且必要。
+2. **复盘回流细化**（`tact 详细执行计划.md`）：
+   * 在 3.4/3.5/4.1 中补充了“未触发场景标记为未触发/证据不足”以及“共享规则再次实质修改后补做受影响检查与 Pi 短任务验证”的补充说明，使计划闭环更为严密。
+
+---
+
+### 三、验证结果
+
+1. **纯英文检查**：经脚本扫描，运行时 Kit 文件（`AGENTS.md`、`project/README.md` 及全部 `core/*.md`）无任何 CJK 中文字符残留。
+2. **相对链接检查**：`tests/test_cli.py` 中的 `test_installed_markdown_links_resolve` 测试通过，所有跨文档相对跳转均可正常解析。
+3. **单元测试回归**：运行 `python -m unittest discover -s tests -v`，**29 项测试全部 PASS（耗时 3.376s）**。
+
+当前代码完全具备进入阶段 2 最终验收或交由维护者进入阶段 3（Pi 实测）的条件。
+
+---
+
+## Wording comparison 1
+
+### Original
+
+> 发现缺少具体流程，不等于已有的原则没有价值，也不意味着都要塞进 TacT 核心。
+
+### Preferred continuation
+
+> 可以看看 pstack 怎么组织架构设计流程，再结合 TacT 现有的原则，一起挑出适合借鉴的部分。

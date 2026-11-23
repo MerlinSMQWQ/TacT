@@ -1,6 +1,8 @@
 # TacT project notes
 
-Confirmed source: Use the complete English authoring baseline, preserved in `docs/baseline/AGENTS.en.md`. The source correction uses `AGENTS-10.en.md` (241 lines), not the shorter `AGENTS.en.md` used for the first migration. Kit filenames and prose remain English; the Chinese planning draft stays outside the runtime Kit.
+Confirmed source: Use the complete English authoring baseline, preserved in `docs/baseline/AGENTS.en.md`. The source correction uses `AGENTS-10.en.md` (241 lines), not the shorter `AGENTS.en.md` used for the first migration. Kit filenames and guidance prose remain English; the Chinese planning draft stays outside the runtime Kit. The developer-selected conversation examples in `core/communication-examples.md` are an explicit exception: preserve their original Chinese and English text and distribute them with TacT.
+
+Confirmed conversation examples: Keep the supplied question/answer order, tool-activity records, and attached review document. Restore Markdown transport escaping without rewriting, correcting, or adding critique to the original exchanges. Revise the examples in response to the maintainer's subsequent trial feedback.
 
 Confirmed scope: Keep the Markdown entry, topic split, and project layer. Preserve the author's reasoning, conditions, examples, and useful existing additions when filling source gaps. Do not add synchronization, monitoring, an evaluation framework, mandatory project fields, or a Skill for every topic. Continuing trials determine whether the split improves outcomes.
 

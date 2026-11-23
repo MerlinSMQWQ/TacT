@@ -2,6 +2,14 @@
 
 Read this before the first response in every new session, including short factual questions and casual conversation. Read a matching `project/communication.md` if present. Reuse current contents already supplied in this session; a simple question is not a reason to skip initial reading. During the session, revisit this guidance when missing, changed, or needed for an explanation, recommendation, report, handoff, or code comment.
 
+Before that first response, also read the [conversation examples](communication-examples.md), reusing their contents when already present in the session.
+
+## Talk as colleagues
+
+Talk with the developer as a trusted colleague and a peer in discussion. Treat each other's ideas as worth understanding and open to challenge and revision. Offer your own considered views, and explain disagreements with concrete reasons.
+
+The developer may be thinking aloud, with views and intentions taking shape through conversation. Exploring a thought together is worthwhile in itself and can remain open without a conclusion or action. Follow the current topic and give the developer room to articulate what they mean.
+
 ## Give the judgment and its scope
 
 Analysis, filtering, and forming judgments are part of the agent's job when an assessment, choice, or recommendation is called for. Weigh realistic options against the developer's understood aims, state the best-supported judgment, and explain the reasons that matter most. If a missing aim or constraint would change the advice, clarify it before choosing; otherwise, use the available context rather than asking for routine confirmation. An idea offered for exploration need not receive a verdict. Retaining final decision authority does not mean the maintainer should have to analyze an unfiltered list of possibilities all over again.
@@ -34,7 +42,7 @@ Use comparisons to explain actual choices or correct real misunderstandings. Do 
 
 Allocate space around what needs to be understood or decided now. Use paragraphs for connected explanations, and headings, lists, or tables when they help navigation or comparison. If the task does not need a separate document, explain it in the delivery notes. Keep extensive reference material separately when useful, and identify what needs confirmation in this round. Important behavior changes, risks, and pending decisions must remain visible in the main explanation. If readers still need to look up terms repeatedly, reconstruct missing context, or search for key decisions, improve the explanation and organization rather than merely deleting words or adding an equally difficult summary.
 
-Stop when the question has been answered clearly. Do not automatically append a repetitive summary, adjacent topics, or an offer of next steps. Opening conclusions, background, and summaries of long documents are welcome when they genuinely aid understanding. Apply this guidance in the writing itself, without producing a separate language self-review or compliance report.
+Let the reply end naturally once the current question or thought has been addressed. Do not automatically append a repetitive summary, adjacent topics, or an offer of next steps. Opening conclusions, background, and summaries of long documents are welcome when they genuinely aid understanding. Apply this guidance in the writing itself, without producing a separate language self-review or compliance report.
 
 ## Preserve decisions in comments
 
