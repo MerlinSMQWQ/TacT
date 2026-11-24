@@ -165,14 +165,15 @@ class InitTests(unittest.TestCase):
         self.assertIn(".tact/core/working.md: file bytes differ", result.stderr)
         self.assertEqual(before, self.snapshot())
 
-    def test_modified_entry_block_is_preserved_and_reported(self):
+    def test_modified_entry_block_blocks_init_but_allows_refresh(self):
         self.run_cli("init")
         entry = self.root / "AGENTS.md"
         entry.write_text(entry.read_text().replace("Before your first response", "Only when asked"))
         before = self.snapshot()
-        for command in ("init", "refresh"):
-            self.assertIn("TacT block", self.run_cli(command, expected=1).stderr)
-            self.assertEqual(before, self.snapshot())
+        self.assertIn("TacT block", self.run_cli("init", expected=1).stderr)
+        self.assertEqual(before, self.snapshot())
+        self.assertIn("Already up to date", self.run_cli("refresh").stdout)
+        self.assertEqual(before, self.snapshot())
 
     def test_invalid_markers_do_not_create_a_partial_kit(self):
         for content in ["<!-- tact:begin -->", "<!-- tact:end -->", "<!-- tact:begin -->" * 2,
@@ -326,7 +327,7 @@ class InitTests(unittest.TestCase):
             relative = str(path.relative_to(self.root))
             self.assertEqual(before[relative], after[relative])
 
-    def test_refresh_migrates_legacy_entry_preserving_surroundings_and_newlines(self):
+    def test_refresh_migrates_generated_legacy_entry_preserving_newlines(self):
         self.run_cli("init")
         current_template = (self.root / "AGENTS.md").read_bytes()
         for newline in (b"\n", b"\r\n"):
@@ -334,8 +335,8 @@ class InitTests(unittest.TestCase):
                 self.prepare_older_kit()
                 entry = self.root / "AGENTS.md"
                 current = current_template.replace(b"\n", newline)
-                prefix = "# Local instructions 项目\n\n".encode().replace(b"\n", newline)
-                suffix = b"\nKeep this local rule; no final newline.".replace(b"\n", newline)
+                prefix = newline
+                suffix = newline + b" \t"
                 entry.write_bytes(prefix + LEGACY_ENTRY.encode().replace(b"\n", newline) + suffix)
                 entry.chmod(0o640)
                 supplement = self.root / ".tact/project/communication.md"
@@ -359,17 +360,81 @@ class InitTests(unittest.TestCase):
                 self.assertIn("Already initialized", self.run_cli("init").stdout)
                 self.assertEqual(after, self.snapshot())
 
-    def test_refresh_preserves_customized_legacy_entry_before_any_writes(self):
-        self.prepare_older_kit()
+    def test_refresh_preserves_custom_root_entries_while_updating_shared_files(self):
+        self.run_cli("init")
         entry = self.root / "AGENTS.md"
-        entry.write_text(LEGACY_ENTRY.replace("Before substantive work", "Only when asked"))
-        (self.root / ".tact/core/tools.md").unlink()
-        before = self.snapshot()
-        for flags in ((), ("--dry-run",)):
-            result = self.run_cli("refresh", *flags, expected=1)
-            self.assertIn("TacT block", result.stderr)
-            self.assertIn("No files changed", result.stderr)
-            self.assertEqual(before, self.snapshot())
+        current = entry.read_bytes()
+        cases = {
+            "project instructions only": b"# Project instructions\nKeep our public API.\n",
+            "project prefix": b"# Project instructions\n\n" + current,
+            "project suffix": current + b"\nKeep our public API.",
+            "legacy block with project content": (
+                b"# Project instructions\r\n\r\n"
+                + LEGACY_ENTRY.encode().replace(b"\n", b"\r\n")
+                + b"\r\nKeep our public API."
+            ),
+            "custom legacy block": LEGACY_ENTRY.replace(
+                "Before substantive work", "Only when asked",
+            ).encode(),
+            "blank line inside current block": current.replace(
+                b"<!-- tact:begin -->\n", b"<!-- tact:begin -->\n\n", 1,
+            ),
+            "incomplete markers": b"# Project instructions\n<!-- tact:begin -->\nCustom guide.\n",
+            "duplicate blocks": current + current,
+            "non-UTF-8 project content": b"# Project instructions\n\xff\n",
+        }
+        for name, content in cases.items():
+            with self.subTest(name=name):
+                entry.write_bytes(current)
+                self.prepare_older_kit()
+                entry.write_bytes(content)
+                entry.chmod(0o640)
+                missing_topic = self.root / ".tact/core/tools.md"
+                missing_topic.unlink()
+                before = self.snapshot()
+
+                preview = self.run_cli("refresh", "--dry-run")
+                self.assertIn("WOULD UPDATE .tact/core/README.md", preview.stdout)
+                self.assertIn("WOULD CREATE .tact/core/tools.md", preview.stdout)
+                self.assertNotIn("WOULD UPDATE AGENTS.md", preview.stdout)
+                self.assertNotIn("WOULD APPEND AGENTS.md", preview.stdout)
+                self.assertEqual(before, self.snapshot())
+
+                result = self.run_cli("refresh")
+                self.assertIn("UPDATE .tact/core/README.md", result.stdout)
+                self.assertEqual(self.snapshot()["AGENTS.md"], before["AGENTS.md"])
+                self.assertEqual(entry.stat().st_mode & 0o777, 0o640)
+                self.assertEqual((self.root / ".tact/core/README.md").read_bytes(),
+                                 (SOURCE_ROOT / "core/README.md").read_bytes())
+                self.assertEqual(missing_topic.read_bytes(), (SOURCE_ROOT / "core/tools.md").read_bytes())
+                manifest = json.loads((self.root / ".tact/manifest.json").read_text())
+                for relative, digest in manifest["files"].items():
+                    self.assertEqual(sha256((self.root / relative).read_bytes()).hexdigest(), digest)
+                after = self.snapshot()
+                self.assertIn("Already up to date", self.run_cli("refresh").stdout)
+                self.assertEqual(after, self.snapshot())
+
+    def test_refresh_restores_a_missing_or_empty_root_entry(self):
+        self.run_cli("init")
+        entry = self.root / "AGENTS.md"
+        current = entry.read_bytes()
+        for content in (None, b"", b"\r\n"):
+            with self.subTest(content=content):
+                entry.write_bytes(current)
+                self.prepare_older_kit()
+                if content is None:
+                    entry.unlink()
+                else:
+                    entry.write_bytes(content)
+                before = self.snapshot()
+                preview = self.run_cli("refresh", "--dry-run")
+                action = "CREATE" if content is None else "APPEND"
+                self.assertIn(f"WOULD {action} AGENTS.md", preview.stdout)
+                self.assertEqual(before, self.snapshot())
+                self.run_cli("refresh")
+                self.assertIn(b"[communication guidance](.tact/core/communication.md)", entry.read_bytes())
+                self.assertEqual((self.root / ".tact/core/README.md").read_bytes(),
+                                 (SOURCE_ROOT / "core/README.md").read_bytes())
 
     def test_refresh_removes_source_adoption_block_from_shared_entry(self):
         from tact.cli import ENTRY

@@ -104,6 +104,12 @@ def show_diff(relative: str, before: bytes | None, after: bytes) -> str:
 def entry_content(before: bytes | None, *, update: bool = False) -> bytes:
     if before is None:
         return ENTRY.encode("utf-8")
+    # Refresh owns only a complete generated entry. Preserve project-owned
+    # bytes without interpreting their markers or blocking shared updates.
+    if update and before.strip() and before.replace(b"\r\n", b"\n").strip() not in (
+        ENTRY.encode().strip(), LEGACY_ENTRY.encode().strip(),
+    ):
+        return before
     try:
         text = before.decode("utf-8")
     except UnicodeDecodeError as error:
