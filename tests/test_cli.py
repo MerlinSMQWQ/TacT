@@ -49,6 +49,34 @@ ask about consequential unresolved conflicts before taking dependent actions.
 <!-- tact:end -->
 """
 
+# Generated with completeness checks, before the communication/style split.
+COMPLETE_READING_ENTRY = """<!-- tact:begin -->
+## TacT Agent Kit
+
+Before your first response in each new session, read the [TacT entry](.tact/AGENTS.md),
+[project notes](.tact/project/notes.md), and
+[communication guidance](.tact/core/communication.md). Also read
+`.tact/project/communication.md` if it exists. This applies to short questions
+and casual conversation as well as engineering work; do not defer it until a
+substantive task. Reuse their current contents if already supplied in this
+session; otherwise read the files. Follow the entry's remaining topic-reading
+triggers and check matching project supplements.
+
+Read each required file in full before the response or action it governs.
+Check the text actually returned: successful commands can still yield truncated
+output. Keep reads within individual and combined output limits; read long files
+separately in consecutive ranges and recover every missing range, including
+partly returned lines. If coverage is unclear, reread that file in smaller
+ranges. Reuse complete current contents already in context. If required content
+remains unavailable, report the gap and pause dependent actions.
+
+The Kit root is `.tact/` in this repository. Resolve paths inside the Kit from
+that directory, even when working in a subdirectory. Keep the existing repository
+instructions in force. Resolve conflicts using the host's instruction hierarchy;
+ask about consequential unresolved conflicts before taking dependent actions.
+<!-- tact:end -->
+"""
+
 
 class InitTests(unittest.TestCase):
     def setUp(self):
@@ -109,6 +137,7 @@ class InitTests(unittest.TestCase):
             self.assertEqual(sha256((self.root / relative).read_bytes()).hexdigest(), digest)
         self.assertIn(".tact/AGENTS.md", (self.root / "AGENTS.md").read_text())
         self.assertIn(".tact/core/communication.md", (self.root / "AGENTS.md").read_text())
+        self.assertIn(".tact/core/style.md", (self.root / "AGENTS.md").read_text())
         skill = self.root / ".agents/skills/tact"
         for relative in ("SKILL.md", "agents/openai.yaml"):
             self.assertEqual((skill / relative).read_bytes(), (SOURCE_ROOT / "skills/tact" / relative).read_bytes())
@@ -289,9 +318,9 @@ class InitTests(unittest.TestCase):
         manifest = json.loads(manifest_path.read_text())
         manifest["version"] = "0.1.0"
         manifest["files"][".tact/core/README.md"] = sha256(old_readme.read_bytes()).hexdigest()
-        # Older releases installed no skill; refresh must add it without a baseline.
+        # Older releases installed no skill or style file; refresh must add both.
         for relative in list(manifest["files"]):
-            if relative.startswith(".agents/"):
+            if relative.startswith(".agents/") or relative == ".tact/core/style.md":
                 (self.root / relative).unlink()
                 del manifest["files"][relative]
         manifest_path.write_text(json.dumps(manifest, indent=2) + "\n")
@@ -312,6 +341,7 @@ class InitTests(unittest.TestCase):
         preview = self.run_cli("refresh", self.root, "--dry-run", cwd=self.temp.name)
         self.assertIn("WOULD UPDATE .tact/core/README.md", preview.stdout)
         self.assertIn("WOULD CREATE .agents/skills/tact/SKILL.md", preview.stdout)
+        self.assertIn("WOULD CREATE .tact/core/style.md", preview.stdout)
         self.assertIn("+This file intentionally starts nearly empty", preview.stdout)
         self.assertEqual(before, self.snapshot())
         result = self.run_cli("refresh")
@@ -319,6 +349,8 @@ class InitTests(unittest.TestCase):
         self.assertEqual(old_readme.read_bytes(), (SOURCE_ROOT / "core/README.md").read_bytes())
         self.assertEqual(old_readme.stat().st_mode & 0o777, 0o640)
         self.assertTrue((self.root / ".agents/skills/tact/agents/openai.yaml").is_file())
+        self.assertEqual((self.root / ".tact/core/style.md").read_bytes(),
+                         (SOURCE_ROOT / "core/style.md").read_bytes())
         notes = (self.root / ".tact/project/notes.md").read_text()
         self.assertIn("project maintainer and agents", notes)
         self.assertIn(f"version `{metadata.version('tact-agent-kit')}`", notes)
@@ -353,6 +385,7 @@ class InitTests(unittest.TestCase):
         for legacy, newline in (
             (LEGACY_ENTRY, b"\n"), (LEGACY_ENTRY, b"\r\n"),
             (INITIAL_READING_ENTRY, b"\n"), (INITIAL_READING_ENTRY, b"\r\n"),
+            (COMPLETE_READING_ENTRY, b"\n"), (COMPLETE_READING_ENTRY, b"\r\n"),
         ):
             with self.subTest(legacy=legacy, newline=newline):
                 self.prepare_older_kit()
@@ -364,13 +397,15 @@ class InitTests(unittest.TestCase):
                 entry.chmod(0o640)
                 supplement = self.root / ".tact/project/communication.md"
                 supplement.write_bytes(b"# Our communication preferences\nUse plain language.\n")
+                style_supplement = self.root / ".tact/project/style.md"
+                style_supplement.write_bytes(b"# Our style preferences\nUse familiar technical terms.\n")
                 before = self.snapshot()
 
                 self.assertIn("tact refresh --dry-run", self.run_cli("init", expected=1).stderr)
                 self.assertEqual(before, self.snapshot())
                 preview = self.run_cli("refresh", "--dry-run")
                 self.assertIn("WOULD UPDATE AGENTS.md", preview.stdout)
-                self.assertIn("Read each required file in full", preview.stdout)
+                self.assertIn(".tact/core/style.md", preview.stdout)
                 self.assertEqual(before, self.snapshot())
 
                 self.run_cli("refresh")
@@ -378,6 +413,8 @@ class InitTests(unittest.TestCase):
                 self.assertEqual(entry.stat().st_mode & 0o777, 0o640)
                 self.assertEqual(self.snapshot()[".tact/project/communication.md"],
                                  before[".tact/project/communication.md"])
+                self.assertEqual(self.snapshot()[".tact/project/style.md"],
+                                 before[".tact/project/style.md"])
                 after = self.snapshot()
                 self.assertIn("Already up to date", self.run_cli("refresh").stdout)
                 self.assertIn("Already initialized", self.run_cli("init").stdout)
@@ -404,6 +441,12 @@ class InitTests(unittest.TestCase):
             ),
             "custom initial reading block": INITIAL_READING_ENTRY.replace(
                 "Before your first response", "Only when asked",
+            ).encode(),
+            "complete reading block with project content": (
+                COMPLETE_READING_ENTRY.encode() + b"\nKeep our public API."
+            ),
+            "custom complete reading block": COMPLETE_READING_ENTRY.replace(
+                "Read each required file in full", "Read only the introduction",
             ).encode(),
             "blank line inside initial reading block": INITIAL_READING_ENTRY.replace(
                 "<!-- tact:begin -->\n", "<!-- tact:begin -->\n\n", 1,
@@ -465,6 +508,7 @@ class InitTests(unittest.TestCase):
                 self.assertEqual(before, self.snapshot())
                 self.run_cli("refresh")
                 self.assertIn(b"[communication guidance](.tact/core/communication.md)", entry.read_bytes())
+                self.assertIn(b".tact/core/style.md", entry.read_bytes())
                 self.assertEqual((self.root / ".tact/core/README.md").read_bytes(),
                                  (SOURCE_ROOT / "core/README.md").read_bytes())
 
@@ -595,6 +639,7 @@ class InitTests(unittest.TestCase):
             {(skill.parent / destination).resolve() for destination in destinations},
             {(self.root / relative).resolve() for relative in (
                 ".tact/AGENTS.md", ".tact/project/notes.md", ".tact/core/communication.md",
+                ".tact/core/style.md",
             )},
         )
 
@@ -604,7 +649,7 @@ class InitTests(unittest.TestCase):
         self.prepare_older_kit()
         entry = self.root / "AGENTS.md"
         expected_entry = entry.read_bytes()
-        entry.write_text(INITIAL_READING_ENTRY)
+        entry.write_text(COMPLETE_READING_ENTRY)
         manifest_path = self.root / ".tact/manifest.json"
         previous_manifest = manifest_path.read_bytes()
         real_replace = Path.replace
