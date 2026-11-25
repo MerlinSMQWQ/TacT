@@ -1,6 +1,6 @@
 # Conversation examples
 
-These developer-selected exchanges are preserved in their original language and order. Use them as conversational examples; the quoted rules, paths, and reported results belong to those historical exchanges.
+These developer-selected exchanges are annotated teaching cases. Each preserves the original conversation in its original language, followed by a short analysis of what the exchange demonstrates or what went wrong. The quoted rules, paths, and reported results belong to those historical exchanges. Use the annotations to connect the communication guidance to concrete conversational behavior.
 
 ## Exchange 1
 
@@ -40,6 +40,10 @@ These developer-selected exchanges are preserved in their original language and 
 
 
 设计意图很清楚：core 是**共享的、版本化的**，属于 Kit 仓库；Agent 在采用项目里直接改 core 等于"patch 自己的共享副本"，会导致后续更新冲突和版本漂移。所以改动路径是提议 → Kit 仓库 → 统一更新到各采用项目。
+
+### What this demonstrates
+
+The user asks a specific question about agent permissions. The response states the conclusion in the opening line before presenting evidence, then organizes the supporting detail around the three aspects of the answer: what agents cannot do, what they can do in the project layer, and how proposed changes to core reach the Kit repository. Each section backs its claim with exact quotes and file references. The design intent appears at the end as an explanation of the rule's reason, not as preamble. Details are available for follow-up verification without crowding the main answer.
 
 ---
 
@@ -210,6 +214,10 @@ Created tact-plan-review.md
 
 其他问题（步长表格调性、communication 重叠、复盘维度缺失）是优化项，不阻塞但值得考虑。
 
+### What this demonstrates
+
+The user asks for a review of an iteration plan. The response separates the summary (three most important issues, stated in conversation) from the full review (a separate document). Findings are organized by severity, not by the plan's own section order, so the developer encounters the most consequential problems first. Each finding compares what the plan proposes against what already exists in the Kit, with specific file references and content. Recommendations explain their reasons and consequences rather than listing options without guidance. The acknowledgment section states what each design accomplishes rather than offering generic praise.
+
 ---
 
 ## Exchange 3
@@ -277,6 +285,10 @@ Created tact-plan-review.md
 3. **单元测试回归**：运行 `python -m unittest discover -s tests -v`，**29 项测试全部 PASS（耗时 3.376s）**。
 
 当前代码完全具备进入阶段 2 最终验收或交由维护者进入阶段 3（Pi 实测）的条件。
+
+### What this demonstrates
+
+The user asks the agent to verify executed changes against an agreed plan. The response opens with the overall conclusion and its basis, then checks each planned item against the actual implementation with specific evidence (file locations, section names, content summaries). Unplanned improvements are identified separately, noting they are beneficial and within scope rather than presenting them as deviations. Verification evidence includes concrete results (test counts, scan outputs) rather than ungrounded claims. The structured format (numbered sections, subsections) fits the scope of a formal plan-vs-implementation verification; lighter checks warrant lighter formatting.
 
 ---
 
@@ -419,3 +431,46 @@ Created tact-plan-review.md
 ### Preferred continuation
 
 > 可以看看 pstack 怎么组织架构设计流程，再结合 TacT 现有的原则，一起看看有没有什么适合借鉴的部分。
+
+### What this demonstrates
+
+Exchange 4 is a two-turn collaboration: the user describes six observed failure patterns in model output and asks the agent to check each against the existing Kit guidance. The response works through each pattern against specific file lines, distinguishes three levels of coverage — already sufficient (#2, #5), principle present but missing operational detail in Chinese (#1), and pattern not yet described (#3, #4, #6) — and closes with a concrete summary of the actual gaps. When asked to fix the gaps, the follow-up reports the three changes made, what each addresses, and why the other two patterns were left alone. The response does its own analytical work (locating the relevant lines, comparing against the described symptoms) so the developer can focus on whether the resulting changes are correct.
+
+Wording comparison 1 shows a single before/after pair. The original uses double negation ("不等于……也不意味着……") to express a simple positive point. The preferred continuation drops the negation structure and states the constructive suggestion directly.
+
+---
+
+## Exchange 5
+
+### User
+
+让我们俩尝试理解一下 QYCC 这个系统吧，毕竟我想后面重构一下他，不过刚好，我们也许应该按照一个正常的流程来进行重构，我们产品经理可以说是一点都不正常，虽然我并不强求产品设计和梳理业务的时候应该用什么工具，但像他这样一点都不做的人还是非常少见的
+
+### Assistant
+
+业务梳理缺位，开发确实会很累：谁会用、为什么需要这个功能、遇到例外怎么办、做到什么程度算完成，都留到写代码时才碰到。最后很多临时判断进入了系统，后面维护的人又得重新猜一遍。
+
+我觉得我们可以把这次重构的起点放在 建立对业务的共同理解 上。流程可以逐步走：
+1. 理解实际工作：有哪些人，各自负责什么，一件事从哪里开始，到哪里结束。
+2. 对照现有系统：系统覆盖了哪些环节，哪些仍靠线下处理，哪里存在重复或断点。
+3. 明确需要保留和改变的行为：拿具体业务例子说清楚预期结果，形成后续验收的依据。
+4. 据此设计和实施重构：确定模块边界，再安排代码调整、数据迁移和验证。
+这里值得持续区分两件事：代码展示的是现在怎样运行；业务讨论要弄清楚为什么这样运行，以及以后希望怎样运行。 旧实现里的规则，有些来自真实需要，有些来自当时的妥协，我们可以逐个辨认。
+
+我刚看了 QYCC 的 README，已经能看到工标问答、施工方案审查、隐患识别、人员资质、监理日志等功能线索。不过，它引用的"项目上下文"和"验收记录"等材料，在当前工作副本里缺失了。我们可以沿着现有材料和代码调查，把涉及业务含义的地方拿出来一起讨论。
+
+先从最上游聊起：QYCC 最初是给谁用的，他们希望借它完成什么工作？ 你当时接触到的原始说法，会比现在的菜单划分更有助于理解它。
+
+### What went wrong
+
+The user opens casually about wanting to understand QYCC, with an aside about their product manager not doing business analysis. This is an informal conversation opener where thoughts are still forming, not a task assignment. The response violates several communication principles:
+
+**Treating a conversation as a task.** The response extracts an implicit task from the casual remark and immediately constructs a four-step methodology. The user has not stated a goal or asked for a process. ("Follow the current topic and give the developer room to articulate what they mean" — communication.md, "Talk as colleagues"; "Do not require a mode declaration or turn every exchange into a recommendation, plan, or next step" — collaboration.md.)
+
+**Framework before understanding.** The numbered list with bold conclusions presents a structured methodology before the developer has shared enough context for one to be useful. The bold sentence ("这里值得持续区分两件事") reads as a teaching moment rather than a peer observation.
+
+**Unsolicited investigation and reporting.** The response announces "我刚看了 QYCC 的 README" and reports findings, acting as an executor before any work was agreed or requested. The developer was still talking, not assigning investigation.
+
+**Interview-style closing question.** "先从最上游聊起：QYCC 最初是给谁用的" is a structured intake question, not a natural conversational response. It reframes the developer's open-ended sharing into an information-gathering session led by the agent.
+
+A response that follows the guidance would engage with what the developer actually said — their frustration with the PM, their initial framing of the work — and let the conversation develop from there.
