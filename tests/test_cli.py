@@ -29,6 +29,26 @@ ask about consequential unresolved conflicts before taking dependent actions.
 <!-- tact:end -->
 """
 
+# Generated after first-response reading became mandatory, before completeness checks.
+INITIAL_READING_ENTRY = """<!-- tact:begin -->
+## TacT Agent Kit
+
+Before your first response in each new session, read the [TacT entry](.tact/AGENTS.md),
+[project notes](.tact/project/notes.md), and
+[communication guidance](.tact/core/communication.md). Also read
+`.tact/project/communication.md` if it exists. This applies to short questions
+and casual conversation as well as engineering work; do not defer it until a
+substantive task. Reuse their current contents if already supplied in this
+session; otherwise read the files. Follow the entry's remaining topic-reading
+triggers and check matching project supplements.
+
+The Kit root is `.tact/` in this repository. Resolve paths inside the Kit from
+that directory, even when working in a subdirectory. Keep the existing repository
+instructions in force. Resolve conflicts using the host's instruction hierarchy;
+ask about consequential unresolved conflicts before taking dependent actions.
+<!-- tact:end -->
+"""
+
 
 class InitTests(unittest.TestCase):
     def setUp(self):
@@ -330,14 +350,17 @@ class InitTests(unittest.TestCase):
     def test_refresh_migrates_generated_legacy_entry_preserving_newlines(self):
         self.run_cli("init")
         current_template = (self.root / "AGENTS.md").read_bytes()
-        for newline in (b"\n", b"\r\n"):
-            with self.subTest(newline=newline):
+        for legacy, newline in (
+            (LEGACY_ENTRY, b"\n"), (LEGACY_ENTRY, b"\r\n"),
+            (INITIAL_READING_ENTRY, b"\n"), (INITIAL_READING_ENTRY, b"\r\n"),
+        ):
+            with self.subTest(legacy=legacy, newline=newline):
                 self.prepare_older_kit()
                 entry = self.root / "AGENTS.md"
                 current = current_template.replace(b"\n", newline)
                 prefix = newline
                 suffix = newline + b" \t"
-                entry.write_bytes(prefix + LEGACY_ENTRY.encode().replace(b"\n", newline) + suffix)
+                entry.write_bytes(prefix + legacy.encode().replace(b"\n", newline) + suffix)
                 entry.chmod(0o640)
                 supplement = self.root / ".tact/project/communication.md"
                 supplement.write_bytes(b"# Our communication preferences\nUse plain language.\n")
@@ -347,7 +370,7 @@ class InitTests(unittest.TestCase):
                 self.assertEqual(before, self.snapshot())
                 preview = self.run_cli("refresh", "--dry-run")
                 self.assertIn("WOULD UPDATE AGENTS.md", preview.stdout)
-                self.assertIn("[communication guidance](.tact/core/communication.md)", preview.stdout)
+                self.assertIn("Read each required file in full", preview.stdout)
                 self.assertEqual(before, self.snapshot())
 
                 self.run_cli("refresh")
@@ -375,6 +398,15 @@ class InitTests(unittest.TestCase):
             ),
             "custom legacy block": LEGACY_ENTRY.replace(
                 "Before substantive work", "Only when asked",
+            ).encode(),
+            "initial reading block with project content": (
+                INITIAL_READING_ENTRY.encode() + b"\nKeep our public API."
+            ),
+            "custom initial reading block": INITIAL_READING_ENTRY.replace(
+                "Before your first response", "Only when asked",
+            ).encode(),
+            "blank line inside initial reading block": INITIAL_READING_ENTRY.replace(
+                "<!-- tact:begin -->\n", "<!-- tact:begin -->\n\n", 1,
             ).encode(),
             "blank line inside current block": current.replace(
                 b"<!-- tact:begin -->\n", b"<!-- tact:begin -->\n\n", 1,
@@ -572,7 +604,7 @@ class InitTests(unittest.TestCase):
         self.prepare_older_kit()
         entry = self.root / "AGENTS.md"
         expected_entry = entry.read_bytes()
-        entry.write_text(LEGACY_ENTRY)
+        entry.write_text(INITIAL_READING_ENTRY)
         manifest_path = self.root / ".tact/manifest.json"
         previous_manifest = manifest_path.read_bytes()
         real_replace = Path.replace

@@ -30,6 +30,26 @@ instructions in force. Resolve conflicts using the host's instruction hierarchy;
 ask about consequential unresolved conflicts before taking dependent actions.
 {END}
 """
+# The generated entry before complete-read checks were added.
+INITIAL_READING_ENTRY = f"""{BEGIN}
+## TacT Agent Kit
+
+Before your first response in each new session, read the [TacT entry](.tact/AGENTS.md),
+[project notes](.tact/project/notes.md), and
+[communication guidance](.tact/core/communication.md). Also read
+`.tact/project/communication.md` if it exists. This applies to short questions
+and casual conversation as well as engineering work; do not defer it until a
+substantive task. Reuse their current contents if already supplied in this
+session; otherwise read the files. Follow the entry's remaining topic-reading
+triggers and check matching project supplements.
+
+The Kit root is `.tact/` in this repository. Resolve paths inside the Kit from
+that directory, even when working in a subdirectory. Keep the existing repository
+instructions in force. Resolve conflicts using the host's instruction hierarchy;
+ask about consequential unresolved conflicts before taking dependent actions.
+{END}
+"""
+LEGACY_ENTRIES = (LEGACY_ENTRY, INITIAL_READING_ENTRY)
 ENTRY = f"""{BEGIN}
 ## TacT Agent Kit
 
@@ -41,6 +61,14 @@ and casual conversation as well as engineering work; do not defer it until a
 substantive task. Reuse their current contents if already supplied in this
 session; otherwise read the files. Follow the entry's remaining topic-reading
 triggers and check matching project supplements.
+
+Read each required file in full before the response or action it governs.
+Check the text actually returned: successful commands can still yield truncated
+output. Keep reads within individual and combined output limits; read long files
+separately in consecutive ranges and recover every missing range, including
+partly returned lines. If coverage is unclear, reread that file in smaller
+ranges. Reuse complete current contents already in context. If required content
+remains unavailable, report the gap and pause dependent actions.
 
 The Kit root is `.tact/` in this repository. Resolve paths inside the Kit from
 that directory, even when working in a subdirectory. Keep the existing repository
@@ -107,7 +135,7 @@ def entry_content(before: bytes | None, *, update: bool = False) -> bytes:
     # Refresh owns only a complete generated entry. Preserve project-owned
     # bytes without interpreting their markers or blocking shared updates.
     if update and before.strip() and before.replace(b"\r\n", b"\n").strip() not in (
-        ENTRY.encode().strip(), LEGACY_ENTRY.encode().strip(),
+        template.encode().strip() for template in (ENTRY, *LEGACY_ENTRIES)
     ):
         return before
     try:
@@ -120,7 +148,7 @@ def entry_content(before: bytes | None, *, update: bool = False) -> bytes:
             raise InitError("AGENTS.md has incomplete or duplicate TacT markers.")
         start, end = normalized.index(BEGIN), normalized.index(END) + len(END)
         block = normalized[start:end]
-        if block == LEGACY_ENTRY.rstrip("\n"):
+        if block in (template.rstrip("\n") for template in LEGACY_ENTRIES):
             if not update:
                 raise InitError(
                     "The TacT block uses an older template. init does not upgrade it. "

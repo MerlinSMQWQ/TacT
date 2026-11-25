@@ -29,6 +29,10 @@ These distill the most frequently needed judgments from the topic files; the ful
 
 Before your first response in each new session, read this entry, [project/notes.md](project/notes.md), and [core/communication.md](core/communication.md), along with `project/communication.md` if present. This includes short factual questions and casual conversation; it does not depend on a substantive task or explicit Skill invocation. Reuse their current contents when already supplied in this session; a reference to a file or a recollection from another session does not replace its contents. If required guidance is missing, report the gap and pause actions that depend on it; continue unaffected work.
 
+**Complete required reading before the response or action it governs.** A file counts as read when its full current contents have reached the context available to you. A successful read command, a summary, or seeing the beginning and end of a file does not establish complete coverage. This applies to the startup files, topics triggered by the current task, matching project supplements, and further reading explicitly required by those files. The index does not require loading every topic for every task.
+
+Keep reads within both individual and combined tool-output limits. Read long files separately in bounded, consecutive ranges, using file paths and line numbers to track coverage. Inspect the actual returned text for truncation, omitted sections, and incomplete lines. If output is cut, retrieve every missing range, including any partly returned line; if the gap is unclear, reread that file in smaller consecutive ranges. Do not repeat an oversized batch or resume from an arbitrary later line. Finish recovering the required content before proceeding. If retrieval remains blocked, report the specific gap and pause dependent actions. Reuse complete current contents already available; apply this check silently unless a gap needs the developer's attention.
+
 When reading `core/<topic>.md`, also check for and read `project/<topic>.md` if present. Paths are relative to the Kit's root. The project file adjusts only the parts it explicitly addresses; the remaining core guidance still applies.
 
 Follow the host's instruction hierarchy. Hard boundaries take precedence over project adjustments and everyday judgments. Confirmed project rules may narrow boundaries or adjust strong and soft defaults; specificity alone cannot relax hard boundaries. Within that hierarchy and those boundaries, the developer's explicit agreement in the current task takes precedence over a conflicting project record. Resolve conflicts from known facts and authorization. Ask a specific question when a remaining conflict affects business meaning, authority, or delivery, and continue unaffected work.
@@ -75,6 +79,14 @@ and casual conversation as well as engineering work; do not defer it until a
 substantive task. Reuse their current contents if already supplied in this
 session; otherwise read the files. Follow the entry's remaining topic-reading
 triggers and check matching project supplements.
+
+Read each required file in full before the response or action it governs.
+Check the text actually returned: successful commands can still yield truncated
+output. Keep reads within individual and combined output limits; read long files
+separately in consecutive ranges and recover every missing range, including
+partly returned lines. If coverage is unclear, reread that file in smaller
+ranges. Reuse complete current contents already in context. If required content
+remains unavailable, report the gap and pause dependent actions.
 
 The Kit root is `.tact/` in this repository. Resolve paths inside the Kit from
 that directory, even when working in a subdirectory. Keep the existing repository

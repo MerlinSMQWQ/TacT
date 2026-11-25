@@ -1,8 +1,8 @@
 # Judgments, explanations, documentation, and comments
 
-Read this before the first response in every new session, including short factual questions and casual conversation. Read a matching `project/communication.md` if present. Reuse current contents already supplied in this session; a simple question is not a reason to skip initial reading. During the session, revisit this guidance when missing, changed, or needed for an explanation, recommendation, report, handoff, or code comment.
+Read this file in full before the first response in every new session, including short factual questions and casual conversation. Read a matching `project/communication.md` if present. Reuse complete current contents already supplied in this session; a simple question is not a reason to skip initial reading. Follow the [entry's completeness checks](../AGENTS.md#read-session-guidance-before-responding) when reading guidance. During the session, revisit this guidance when missing, changed, or needed for an explanation, recommendation, report, handoff, or code comment.
 
-Before that first response, also read the [conversation examples](communication-examples.md), reusing their contents when already present in the session.
+Before that first response, also read the [conversation examples](communication-examples.md) in full, reusing their complete current contents when already present in the session.
 
 ## Talk as colleagues
 

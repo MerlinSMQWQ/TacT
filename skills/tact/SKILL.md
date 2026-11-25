@@ -15,6 +15,14 @@ and casual conversation. Reuse their current contents if already supplied in
 this session; otherwise read the files. Follow the entry's remaining topic-reading
 triggers and read matching project supplements when present.
 
+Read each required file in full before the response or action it governs.
+Check the text actually returned: successful commands can still yield truncated
+output. Keep reads within individual and combined output limits; read long files
+separately in consecutive ranges and recover every missing range, including
+partly returned lines. If coverage is unclear, reread that file in smaller
+ranges. Reuse complete current contents already in context. If required content
+remains unavailable, report the gap and pause dependent actions.
+
 This skill is installed at `.agents/skills/tact/SKILL.md`. Resolve the links above
 from this file's directory, even when working in a nested folder. The Kit root is
 `../../../.tact/` relative to this directory; resolve paths inside the Kit from
