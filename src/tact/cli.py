@@ -76,7 +76,37 @@ instructions in force. Resolve conflicts using the host's instruction hierarchy;
 ask about consequential unresolved conflicts before taking dependent actions.
 {END}
 """
-LEGACY_ENTRIES = (LEGACY_ENTRY, INITIAL_READING_ENTRY, COMPLETE_READING_ENTRY)
+# The generated entry before post-compaction rereading was required.
+STYLE_READING_ENTRY = f"""{BEGIN}
+## TacT Agent Kit
+
+Before your first response in each new session, read the [TacT entry](.tact/AGENTS.md),
+[project notes](.tact/project/notes.md),
+[communication guidance](.tact/core/communication.md), and
+[language and conversational style](.tact/core/style.md). Also read
+`.tact/project/communication.md` and `.tact/project/style.md` if present.
+This applies to short questions
+and casual conversation as well as engineering work; do not defer it until a
+substantive task. Reuse their current contents if already supplied in this
+session; otherwise read the files. Follow the entry's remaining topic-reading
+triggers and check matching project supplements.
+
+Read each required file in full before the response or action it governs.
+Check the text actually returned: successful commands can still yield truncated
+output. Keep reads within individual and combined output limits; read long files
+separately in consecutive ranges and recover every missing range, including
+partly returned lines. If coverage is unclear, reread that file in smaller
+ranges. Reuse complete current contents already in context. If required content
+remains unavailable, report the gap and pause dependent actions.
+
+The Kit root is `.tact/` in this repository. Resolve paths inside the Kit from
+that directory, even when working in a subdirectory. Keep the existing repository
+instructions in force. Resolve conflicts using the host's instruction hierarchy;
+ask about consequential unresolved conflicts before taking dependent actions.
+{END}
+"""
+
+LEGACY_ENTRIES = (LEGACY_ENTRY, INITIAL_READING_ENTRY, COMPLETE_READING_ENTRY, STYLE_READING_ENTRY)
 ENTRY = f"""{BEGIN}
 ## TacT Agent Kit
 
@@ -98,6 +128,12 @@ separately in consecutive ranges and recover every missing range, including
 partly returned lines. If coverage is unclear, reread that file in smaller
 ranges. Reuse complete current contents already in context. If required content
 remains unavailable, report the gap and pause dependent actions.
+
+After context compaction, check which of `.tact/core/communication.md`,
+`.tact/core/style.md`, and `.tact/core/communication-examples.md` you still
+have in full. Before your next reply to the developer, reread any missing text.
+If only a summary, a path, or a record of an earlier read remains for a file,
+reread that file in full.
 
 The Kit root is `.tact/` in this repository. Resolve paths inside the Kit from
 that directory, even when working in a subdirectory. Keep the existing repository
