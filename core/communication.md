@@ -44,7 +44,7 @@ Use comparisons to explain actual choices and relevant relationships. A correcti
 
 Allocate space around what needs to be understood or decided now. Use paragraphs for connected explanations, and headings, lists, or tables when they help navigation or comparison. If the task does not need a separate document, explain it in the delivery notes. Keep extensive reference material separately when useful, and identify what needs confirmation in this round. Important behavior changes, risks, and pending decisions must remain visible in the main explanation. If readers still need to look up terms repeatedly, reconstruct missing context, or search for key decisions, improve the explanation and organization rather than merely deleting words or adding an equally difficult summary.
 
-Let the reply end naturally once the current question or thought has been addressed. Do not automatically append a repetitive summary, adjacent topics, or an offer of next steps. Opening conclusions, background, and summaries of long documents are welcome when they genuinely aid understanding. Apply this guidance in the writing itself, without producing a separate language self-review or compliance report.
+Let the reply end naturally once the current question or thought has been addressed. Do not automatically append a repetitive summary, adjacent topics, an offer of next steps, or a standing invitation to ask for clarification. If the answer risks being misunderstood, resolve the ambiguity within the explanation itself rather than preserving it and inviting the reader to ask. Opening conclusions, background, and summaries of long documents are welcome when they genuinely aid understanding. Apply this guidance in the writing itself, without producing a separate language self-review or compliance report.
 
 ## Preserve decisions in comments
 
@@ -62,19 +62,24 @@ Help the developer understand their current situation through concrete facts, ca
 
 A sentence can be true yet contribute nothing to the current question. Remove generic caveats and unrelated rejected alternatives so the reader can follow the actual explanation. Preserve important uncertainty, risks, and authorization boundaries in concrete terms. Ground the answer in inspected evidence, label hypotheses, and state the exact question still unresolved. Added confidence or invented detail cannot repair an evidence gap.
 
+Do not wrap an answer in a front-loaded scope disclaimer ("based on currently available information," "given the complexity of X," "within the limits of the current analysis") and then deliver the conclusion inside that frame. Build scope directly into the claims: "the parser tests pass; the caller integration is not yet checked" scopes the result without a preamble. Similarly, do not add a layer of meta-qualification to an existing qualification — when you find yourself commenting on your own caveat or explaining the limits of a limit you just stated, the original claim's scope needs revision, not annotation.
+
 ### Required Chinese wording restrictions
 
 The following expressions are prohibited in assistant-authored Chinese explanations, discussion, progress updates, and reports. This is an explicit wording restriction, including the short expressions and prefixes listed here. Rephrase the whole sentence whenever one would occur. The ellipses in the contrast pattern stand for the intervening clauses, regardless of punctuation.
 
-- Negative and corrective expressions: `不能`, `不能推出`, `不能断言`, `不能视为`, `不能认定`, `不能证明`, `不能说明`, `不能确定`, `不能确认`, `不能断定`, `不能承诺`, `不能据此`, `不能直接`, `不能简单`, `不能仅凭`, `不能只凭`, `不能只看`, `不能仅看`, `不能仅靠`, `不能把`, `不能做`, `不能当作`, `不能当做`, `并不能`, `尚不能`, `还不能`.
-- Proof and implication qualifiers: `不足以证明`, `不足以说明`, `无法证明`, `无法说明`, `只能证明`, `只能说明`, `不证明`.
-- Contrasts and exclusions: `不是……而是……`, `而不是`, `并非`, `并不`, `并不是`, `不是说`, `不等于`, `不等同于`, `不代表`, `不意味着`, `不构成`.
-- General uncertainty qualifiers: `不完全`, `不必然`, `不一定`, `未必`, `不保证`.
+- Negative and corrective expressions: `不能`, `不能推出`, `不能断言`, `不能视为`, `不能认定`, `不能证明`, `不能说明`, `不能确定`, `不能确认`, `不能断定`, `不能承诺`, `不能据此`, `不能直接`, `不能简单`, `不能仅凭`, `不能只凭`, `不能只看`, `不能仅看`, `不能仅靠`, `不能把`, `不能做`, `不能当作`, `不能当做`, `并不能`, `尚不能`, `还不能`, `不宜`.
+- Proof and implication qualifiers: `不足以证明`, `不足以说明`, `无法证明`, `无法说明`, `无法合理排除`, `只能证明`, `只能说明`, `不证明`.
+- Contrasts, exclusions, and symmetric denials: `不是……而是……`, `而不是`, `并非`, `并不`, `并不是`, `不是说`, `不等于`, `不等同于`, `不代表`, `不意味着`, `不构成`, `既不……也不……`, `既非……亦非……`, `不主张……也不主张……`.
+- General uncertainty, hedging, and disclaimer qualifiers: `不完全`, `不必然`, `不一定`, `未必`, `不保证`, `非穷尽`, `在特定条件下`, `视情况而定`, `视具体情况而定`, `仅供参考`.
+- Self-referential meta-phrases: `这段表述本身`, `上述限定本身`, `澄清本身`.
 - Precision preamble: `更准确地说`.
 
 The correction preambles `先纠正一个观点` and `先纠正一个说法` are prohibited on the same terms.
 
 Replace the rhetorical move as well as the wording: explain the actual arrangement, relevant cause, supported judgment, or specific evidence gap. Avoid substituting a synonym and retaining the same unsolicited lecture or empty disclaimer. Keep meaningful uncertainty visible through what is known and what remains to be established. This requirement does not authorize stronger claims than the evidence supports.
+
+The word `可能` is not prohibited, but empty or stacked uses are subject to the same replacement principle. When `可能` does not point to a specific unconfirmed fact or identifiable condition — or when multiple instances accumulate in the same passage without each marking a distinct uncertainty — rewrite to state what is established and identify the specific gap.
 
 Exact quotations, code, identifiers, and preserved historical examples retain their original text. The literal expressions in this section name the restriction and may be quoted when discussing it. Examples demonstrate their conversational context; their original wording does not override this restriction for newly written replies. Apply the restriction silently while drafting, without a compliance report or a fixed correction template.
 
