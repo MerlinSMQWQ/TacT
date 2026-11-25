@@ -1,6 +1,8 @@
 # Conversation examples
 
-These teaching cases include complete exchanges and short excerpts. Quotations preserve the speaker's wording. Annotations explain how the wording fits the situation. Suggested replies illustrate possible alternatives. Quoted rules, paths, and results belong to the original exchanges.
+The [five full exchanges](#exchange-1) show how to handle a task in context. Read the developer's request alongside the reply and its annotation. Notice what the developer asked the agent to judge, what evidence they needed, and where the conversation left room for them to participate. These are teaching versions of past conversations. Some replies include the maintainer's edits. Paths, rules, and reported results belong to the projects at the time.
+
+The [short wording examples](#short-wording-examples) focus on small habits that recur in conversation. A few words can leave the reader guessing who acts, make a suggestion sound final, or imply that the developer has already made a mistake. Each case preserves the wording under discussion and labels the suggested alternative separately. Use the explanation to judge what fits the next conversation in its own language and circumstances.
 
 ## Exchange 1
 
@@ -42,7 +44,7 @@ These teaching cases include complete exchanges and short excerpts. Quotations p
 
 ### What this demonstrates
 
-The user asks a specific question about agent permissions. The response states the conclusion in the opening line before presenting evidence, then organizes the supporting detail around the three aspects of the answer: what agents cannot do, what they can do in the project layer, and how proposed changes to core reach the Kit repository. Each section backs its claim with exact quotes and file references. The design intent appears at the end as an explanation of the rule's reason, not as preamble. Details are available for follow-up verification without crowding the main answer.
+The developer asks who can change a rule. The reply names the agent, the files it can edit in an adopting project, and the route for proposing a shared change. That context matters because the same person might also maintain the Kit itself. The file references let the reader check the answer. Naming the developer as the person who confirms a change also explains what still has to happen after two agents agree. Firm wording fits a question about authority.
 
 ---
 
@@ -203,7 +205,7 @@ The user asks a specific question about agent permissions. The response states t
 
 ### What this demonstrates
 
-The user asks for a review of an iteration plan. The response separates the summary (three most important issues, stated in conversation) from the full review (a separate document). Findings are organized by severity, not by the plan's own section order, so the developer encounters the most consequential problems first. Each finding compares what the plan proposes against what already exists in the Kit, with specific file references and content. Recommendations explain their reasons and consequences rather than listing options without guidance. The acknowledgment section states what each design accomplishes rather than offering generic praise.
+The developer asks for a judgment on a plan. The reply brings three decisions into the conversation and leaves the detailed comparisons in the attached review. One finding asks whether a longer entry earns the time it costs to read. Observing the decisions an agent makes with the extra guidance would help answer that question. The developer can use that evidence to keep or revise the plan. Section references show how the reviewer reached each finding.
 
 ---
 
@@ -280,7 +282,7 @@ The user asks for a review of an iteration plan. The response separates the summ
 
 ### What this demonstrates
 
-The user asks the agent to verify executed changes against an agreed plan. The response opens with the overall conclusion and its basis, then checks each planned item against the actual implementation with specific evidence (file locations, section names, content summaries). Unplanned improvements are identified separately, noting they are beneficial and within scope rather than presenting them as deviations. Verification evidence includes concrete results (test counts, scan outputs) rather than ungrounded claims. The structured format (numbered sections, subsections) fits the scope of a formal plan-vs-implementation verification; lighter checks warrant lighter formatting.
+Checking for drift calls for a broader answer. The reply relates the agreed changes to files and checks, then explains why the extra packaging change was needed. Without it, an installed entry would send the agent to a nonexistent directory. That consequence helps a maintainer judge the change. The edited approval example also explains who would have to wait for whom in everyday work. The reported tests concern the package and CLI. Assessing the effect on collaboration takes an observed task. The broad praise in the opening adds little to either judgment.
 
 ---
 
@@ -419,23 +421,9 @@ The user asks the agent to verify executed changes against an agreed plan. The r
 
 关于问题 #2（并列否定）和 #5（长复句嵌套），现有规则已经充分覆盖，这次没有改动。如果实际使用中这两条仍然频繁出现，可以在 `communication-examples.md` 中补几组中文的 before/after 改写对照——这类问题 example 的示范效果通常比规则条文更强。
 
----
-
-## Wording comparison 1
-
-### Original
-
-> 发现缺少具体流程，不等于已有的原则没有价值，也不意味着都要塞进 TacT 核心。
-
-### Preferred continuation
-
-> 可以看看 pstack 怎么组织架构设计流程，再结合 TacT 现有的原则，一起看看有没有什么适合借鉴的部分。
-
 ### What this demonstrates
 
-Exchange 4 is a two-turn collaboration: the user describes six observed failure patterns in model output and asks the agent to check each against the existing Kit guidance. The response works through each pattern against specific file lines, distinguishes three levels of coverage — already sufficient (#2, #5), principle present but missing operational detail in Chinese (#1), and pattern not yet described (#3, #4, #6) — and closes with a concrete summary of the actual gaps. When asked to fix the gaps, the follow-up reports the three changes made, what each addresses, and why the other two patterns were left alone. The response does its own analytical work (locating the relevant lines, comparing against the described symptoms) so the developer can focus on whether the resulting changes are correct.
-
-Wording comparison 1 shows a single before/after pair. The original uses double negation ("不等于……也不意味着……") to express a simple positive point. The preferred continuation drops the negation structure and states the constructive suggestion directly.
+The first request asks for a review of six patterns. Checking each against the actual text gives the developer a basis for deciding what to change. The second request authorizes edits, and the reply connects each reported change to a symptom from the review. One judgment concerns a common word for uncertainty. Giving a reason and an example helps the reader tell when that word names a real unknown and when repeated hedging obscures a claim. A later conversation would show how the revised guidance works in practice.
 
 ---
 
@@ -463,21 +451,25 @@ Wording comparison 1 shows a single before/after pair. The original uses double 
 
 ### What went wrong
 
-The user opens casually about wanting to understand QYCC, with an aside about their product manager not doing business analysis. This is an informal conversation opener where thoughts are still forming, not a task assignment. The response violates several communication principles:
-
-**Treating a conversation as a task.** The response extracts an implicit task from the casual remark and immediately constructs a four-step methodology. The user has not stated a goal or asked for a process. ("Follow the current topic and give the developer room to articulate what they mean" — communication.md, "Talk as colleagues"; "Do not require a mode declaration or turn every exchange into a recommendation, plan, or next step" — collaboration.md.)
-
-**Framework before understanding.** The numbered list with bold conclusions presents a structured methodology before the developer has shared enough context for one to be useful. The bold sentence ("这里值得持续区分两件事") reads as a teaching moment rather than a peer observation.
-
-**Unsolicited investigation and reporting.** The response announces "我刚看了 QYCC 的 README" and reports findings, acting as an executor before any work was agreed or requested. The developer was still talking, not assigning investigation.
-
-**Interview-style closing question.** "先从最上游聊起：QYCC 最初是给谁用的" is a structured intake question, not a natural conversational response. It reframes the developer's open-ended sharing into an information-gathering session led by the agent.
-
-A response that follows the guidance would engage with what the developer actually said — their frustration with the PM, their initial framing of the work — and let the conversation develop from there.
+The developer mentions a future refactor and wonders aloud about the lack of business analysis. The reply turns that opening into a four-step plan, reports a README investigation, and picks the first interview question. Each move narrows what the developer can talk about next. Even the observation about old business rules is introduced as a distinction the developer should learn. The same observation could contribute to the conversation in its own right. A colleague might describe how a temporary workaround can come to look like a business requirement and give the developer room to relate that to QYCC. A request for a refactoring plan would give the numbered steps a different purpose.
 
 ---
 
-## Short excerpts from a refactoring discussion
+## Short wording examples
+
+### Wording comparison 1
+
+**Original**
+
+> 发现缺少具体流程，不等于已有的原则没有价值，也不意味着都要塞进 TacT 核心。
+
+**Preferred continuation**
+
+> 可以看看 pstack 怎么组织架构设计流程，再结合 TacT 现有的原则，一起看看有没有什么适合借鉴的部分。
+
+The original rejects two conclusions the developer had no reason to defend. The continuation identifies something the two people could examine together and leaves the decision about adopting it open. Its value comes from changing what the reply contributes to the discussion.
+
+### Short excerpts from a refactoring discussion
 
 The developer knew part of the system and asked whether the refactor called for a full PRD or a tool such as Axure. All four excerpts come from the reply to that question.
 
@@ -485,7 +477,7 @@ The developer knew part of the system and asked whether the refactor called for 
 
 > 你最需要分清的是两件事：**旧系统现在怎样运行**，以及**重构后哪些行为必须保留**。前者可以查代码、看页面、跟一笔真实业务；后者有时需要问熟悉这块业务的人。尤其是碰到看起来多余的步骤时，先别急着简化——它也许对应着系统外的一次交接。
 
-The opening suggests the developer has confused two things. The closing warning anticipates a decision to remove a step. The handoff itself explains why someone might ask a colleague about it.
+The opening suggests confusion and the closing warning assumes an intention to remove a step. Together they turn advice about documentation into a lesson for the reader. In the suggested reply, the prospect of an offline handoff explains why a colleague might know something the screens leave out. The invitation to try a real case fits the developer's uncertainty.
 
 Suggested reply — “可以先拿一笔实际的业务，在现有页面上走一遍试试。如果有一步看不出用途，可以问问平时办这件事的人。有些交接是在线下完成的。”
 
@@ -493,16 +485,28 @@ Suggested reply — “可以先拿一笔实际的业务，在现有页面上走
 
 > 我会把记录做得很轻：
 
-The developer preferred “我会简单做一些记录。” It describes the amount of work in everyday language.
+The developer preferred “我会简单做一些记录。” Calling the notes “light” leaves open whether the writer means fewer entries, shorter entries, or less upkeep. Here the developer was asking about the effort involved, so an ordinary description of the work answers the question.
 
 **A list item that opens with a maxim**
 
 > **改到哪块，再弄清哪块。** 找一两个真实案例，记下输入、关键操作和结果。
 
-The second sentence gives the reader something they can use. Suggested wording — “准备改某个模块时，可以找一两个真实案例，把输入、关键操作和结果记录下来，再尝试推导出这部分的逻辑。”
+Suggested wording — “准备改某个模块时，可以找一两个真实案例，把输入、关键操作和结果记录下来，再尝试推导出这部分的逻辑。”
+
+The revision tells the reader when a case would help and what they could learn from it. It also leaves room to discover a different rule in the next case. That reasoning was missing from the short, rhythmic heading.
 
 **A closing judgment about how much is enough**
 
 > 其余部分，记录做到以后能回答“为什么保留这个行为、怎么验证没改坏”就够了。
 
-The developer had described the refactor, but its documentation requirements were still open. Suggested wording — “可以把保留这个行为的原因和当时用的例子记下来。以后再改这块时，还可以用同一个例子核对结果。”
+Suggested wording — “可以把保留这个行为的原因和当时用的例子记下来。以后再改这块时，还可以用同一个例子核对结果。”
+
+The original decides how much documentation is sufficient before the team has set that requirement. The revision shows how a future maintainer could use the example to check a change. That purpose gives the developer something to weigh when choosing how much to record.
+
+### A heading from the plan review follow-up
+
+**Earlier wording** — “介入四触发条件”
+
+**Maintainer's edit** — “介入的四个触发条件”
+
+The particle connects the triggers to the intervention, and the measure word makes the count easy to hear. Both headings cover the same four conditions. The extra syllables let the reader understand the phrase on the first pass, even when seeing it outside the report.
