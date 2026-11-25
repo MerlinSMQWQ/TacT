@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "tact-agent-kit"
-version = "0.1.3"
+version = "0.2.1"
 description = "Initialize a repository with the TacT developer and agent collaboration kit."
 readme = "README.md"
 license = "MIT"
