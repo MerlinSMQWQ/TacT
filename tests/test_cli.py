@@ -120,6 +120,40 @@ The Kit root is `.tact/` in this repository.""",
 )
 
 
+# Generated before examples moved into a directory.
+OLD_EXAMPLES_ENTRY = """<!-- tact:begin -->
+## TacT Agent Kit
+
+Before your first response in each new session, read the [TacT entry](.tact/AGENTS.md),
+[project notes](.tact/project/notes.md), and
+[communication guidance](.tact/core/communication.md). Also read
+`.tact/project/communication.md` and the existing `.tact/project/style.md`
+if present. This applies to short questions and casual conversation as well as
+engineering work; do not defer it until a substantive task. Reuse their current
+contents if already supplied in this session; otherwise read the files. Follow
+the entry's remaining topic-reading triggers and check matching project supplements.
+
+Read each required file in full before the response or action it governs.
+Check the text actually returned: successful commands can still yield truncated
+output. Keep reads within individual and combined output limits; read long files
+separately in consecutive ranges and recover every missing range, including
+partly returned lines. If coverage is unclear, reread that file in smaller
+ranges. Reuse complete current contents already in context. If required content
+remains unavailable, report the gap and pause dependent actions.
+
+After context compaction, check which of `.tact/core/communication.md` and
+`.tact/core/communication-examples.md` you still have in full. Before your next
+reply to the developer, reread any missing text. If only a summary, a path, or a
+record of an earlier read remains for a file, reread that file in full.
+
+The Kit root is `.tact/` in this repository. Resolve paths inside the Kit from
+that directory, even when working in a subdirectory. Keep the existing repository
+instructions in force. Resolve conflicts using the host's instruction hierarchy;
+ask about consequential unresolved conflicts before taking dependent actions.
+<!-- tact:end -->
+"""
+
+
 class InitTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory(prefix="tact-tests-")
@@ -168,6 +202,10 @@ class InitTests(unittest.TestCase):
         self.assertEqual({path.name for path in (kit / "core").glob("*.md")}, expected_topics)
         for name in expected_topics:
             self.assertEqual((kit / "core" / name).read_bytes(), (SOURCE_ROOT / "core" / name).read_bytes())
+        source_examples = SOURCE_ROOT / "core/example"
+        for source in source_examples.rglob("*.md"):
+            installed = kit / "core/example" / source.relative_to(source_examples)
+            self.assertEqual(installed.read_bytes(), source.read_bytes())
         self.assertEqual((kit / "project/README.md").read_bytes(), (SOURCE_ROOT / "project/README.md").read_bytes())
         notes = (kit / "project/notes.md").read_text()
         self.assertIn(metadata.version("tact-agent-kit"), notes)
@@ -182,8 +220,12 @@ class InitTests(unittest.TestCase):
         self.assertNotIn(".tact/core/style.md", (self.root / "AGENTS.md").read_text())
         for entry in (kit / "AGENTS.md", self.root / "AGENTS.md"):
             recovery = entry.read_text().split("After context compaction", 1)[1].split("\n\n", 1)[0]
-            for name in ("communication.md", "communication-examples.md"):
+            for name in ("communication.md", "example/README.md"):
                 self.assertIn(f"core/{name}", recovery)
+            self.assertTrue(
+                "example/advice/pi-subagents.md" in recovery or
+                "required example identified there" in recovery
+            )
         skill = self.root / ".agents/skills/tact"
         for relative in ("SKILL.md", "agents/openai.yaml"):
             self.assertEqual((skill / relative).read_bytes(), (SOURCE_ROOT / "skills/tact" / relative).read_bytes())
@@ -431,6 +473,7 @@ class InitTests(unittest.TestCase):
             (COMPLETE_READING_ENTRY, b"\n"), (COMPLETE_READING_ENTRY, b"\r\n"),
             (STYLE_READING_ENTRY, b"\n"), (STYLE_READING_ENTRY, b"\r\n"),
             (POST_COMPACTION_STYLE_ENTRY, b"\n"), (POST_COMPACTION_STYLE_ENTRY, b"\r\n"),
+            (OLD_EXAMPLES_ENTRY, b"\n"), (OLD_EXAMPLES_ENTRY, b"\r\n"),
         ):
             with self.subTest(legacy=legacy, newline=newline):
                 self.prepare_older_kit()
@@ -628,6 +671,92 @@ class InitTests(unittest.TestCase):
         self.run_cli("refresh")
         self.assertEqual((self.root / ".tact/core/tools.md").read_bytes(), (SOURCE_ROOT / "core/tools.md").read_bytes())
         self.assertIn("Already initialized", self.run_cli("init").stdout)
+
+    def install_previous_examples(self):
+        self.run_cli("init")
+        old = self.root / ".tact/core/communication-examples.md"
+        old.write_text("Previous examples.\n")
+        manifest = self.root / ".tact/manifest.json"
+        record = json.loads(manifest.read_text())
+        record["files"][".tact/core/communication-examples.md"] = sha256(old.read_bytes()).hexdigest()
+        for path in list(record["files"]):
+            if path.startswith(".tact/core/example/"):
+                (self.root / path).unlink()
+                del record["files"][path]
+        manifest.write_text(json.dumps(record))
+        (self.root / "AGENTS.md").write_text(OLD_EXAMPLES_ENTRY)
+        return old, manifest
+
+    def test_refresh_moves_untouched_examples_and_migrates_entry(self):
+        old, manifest = self.install_previous_examples()
+        before = self.snapshot()
+        self.assertIn("WOULD DELETE .tact/core/communication-examples.md",
+                      self.run_cli("refresh", "--dry-run").stdout)
+        self.assertEqual(self.snapshot(), before)
+        self.run_cli("refresh")
+        self.assertFalse(old.exists())
+        self.assertNotIn(".tact/core/communication-examples.md",
+                         json.loads(manifest.read_text())["files"])
+        self.assertIn(".tact/core/example/README.md", (self.root / "AGENTS.md").read_text())
+        for source in (SOURCE_ROOT / "core/example").rglob("*.md"):
+            relative = source.relative_to(SOURCE_ROOT / "core/example")
+            self.assertEqual((self.root / ".tact/core/example" / relative).read_bytes(),
+                             source.read_bytes())
+        self.assertIn("Already up to date", self.run_cli("refresh").stdout)
+
+    def test_refresh_rejects_edited_old_examples_before_writing(self):
+        old, _ = self.install_previous_examples()
+        old.write_text("Previous examples with local changes.\n")
+        before = self.snapshot()
+        self.assertIn("review the local edits", self.run_cli("refresh", expected=1).stderr)
+        self.assertEqual(self.snapshot(), before)
+
+    def test_refresh_protects_existing_example_target(self):
+        self.install_previous_examples()
+        target = self.root / ".tact/core/example/README.md"
+        target.write_text("A locally created index.\n")
+        before = self.snapshot()
+        self.assertIn(".tact/core/example/README.md", self.run_cli("refresh", expected=1).stderr)
+        self.assertEqual(self.snapshot(), before)
+
+    def test_refresh_rejects_custom_references_to_retired_examples(self):
+        self.install_previous_examples()
+        for name, text in (
+            ("AGENTS.md", "Read .tact/core/communication-examples.md.\n"),
+            (".tact/project/communication.md", "Read ../core/communication-examples.md.\n"),
+            (".tact/project/style.md", "Read ../core/communication-examples.md.\n"),
+        ):
+            with self.subTest(name=name):
+                target = self.root / name
+                original = target.read_bytes() if target.exists() else None
+                target.write_text(text)
+                before = self.snapshot()
+                self.assertIn(name, self.run_cli("refresh", expected=1).stderr)
+                self.assertEqual(self.snapshot(), before)
+                if original is None:
+                    target.unlink()
+                else:
+                    target.write_bytes(original)
+
+    def test_example_removal_can_resume_after_interruption(self):
+        from tact.cli import main
+
+        old, manifest = self.install_previous_examples()
+        old_manifest = manifest.read_bytes()
+        replace = Path.replace
+
+        def fail_manifest(path, destination):
+            if destination.resolve() == manifest.resolve():
+                raise OSError("simulated storage failure")
+            return replace(path, destination)
+
+        with mock.patch.object(Path, "replace", fail_manifest), redirect_stdout(io.StringIO()), redirect_stderr(io.StringIO()):
+            self.assertEqual(main(["refresh", str(self.root)]), 1)
+        self.assertFalse(old.exists())
+        self.assertEqual(manifest.read_bytes(), old_manifest)
+        self.run_cli("refresh")
+        self.assertNotIn(".tact/core/communication-examples.md",
+                         json.loads(manifest.read_text())["files"])
 
     def install_previous_style(self):
         self.run_cli("init")

@@ -2,7 +2,7 @@
 
 Read this file in full before the first response in every new session, including short factual questions and casual conversation. Read `project/communication.md` and the former `project/style.md` supplement if present. Reuse complete current contents already supplied in this session; follow the [entry's completeness checks](../AGENTS.md#read-session-guidance-before-responding). Revisit this guidance when missing, changed, or needed during the session.
 
-Before that first response, also read the [conversation examples](communication-examples.md) in full, reusing their complete current contents when already present in the session.
+Before that first response, also read the [example index](example/README.md) and the required example it identifies in full, reusing their complete current contents when already present in the session.
 
 ## Talk as colleagues
 

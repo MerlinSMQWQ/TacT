@@ -16,6 +16,7 @@ SOURCE = "https://github.com/MerlinSMQWQ/TacT"
 BEGIN = "<!-- tact:begin -->"
 END = "<!-- tact:end -->"
 RETIRED_STYLE = ".tact/core/style.md"
+RETIRED_EXAMPLES = ".tact/core/communication-examples.md"
 # The exact entry emitted before communication became required on the first turn.
 # Only an explicit refresh may migrate this known template.
 LEGACY_ENTRY = f"""{BEGIN}
@@ -142,11 +143,7 @@ ask about consequential unresolved conflicts before taking dependent actions.
 {END}
 """
 
-LEGACY_ENTRIES = (
-    LEGACY_ENTRY, INITIAL_READING_ENTRY, COMPLETE_READING_ENTRY,
-    STYLE_READING_ENTRY, POST_COMPACTION_STYLE_ENTRY,
-)
-ENTRY = f"""{BEGIN}
+OLD_EXAMPLES_ENTRY = f"""{BEGIN}
 ## TacT Agent Kit
 
 Before your first response in each new session, read the [TacT entry](.tact/AGENTS.md),
@@ -177,6 +174,16 @@ instructions in force. Resolve conflicts using the host's instruction hierarchy;
 ask about consequential unresolved conflicts before taking dependent actions.
 {END}
 """
+
+
+LEGACY_ENTRIES = (
+    LEGACY_ENTRY, INITIAL_READING_ENTRY, COMPLETE_READING_ENTRY,
+    STYLE_READING_ENTRY, POST_COMPACTION_STYLE_ENTRY, OLD_EXAMPLES_ENTRY,
+)
+ENTRY = OLD_EXAMPLES_ENTRY.replace(
+    "`.tact/core/communication-examples.md`",
+    "`.tact/core/example/README.md` and `.tact/core/example/advice/pi-subagents.md`",
+)
 
 
 
@@ -305,9 +312,15 @@ def bundled_files() -> tuple[dict[str, bytes], dict[str, bytes]]:
         ".agents/skills/tact/SKILL.md": kit.joinpath("skills/tact/SKILL.md").read_bytes(),
         ".agents/skills/tact/agents/openai.yaml": kit.joinpath("skills/tact/agents/openai.yaml").read_bytes(),
     }
-    for resource in sorted(kit.joinpath("core").iterdir(), key=lambda item: item.name):
-        if resource.is_file() and resource.name.endswith(".md"):
-            shared[f".tact/core/{resource.name}"] = resource.read_bytes()
+    def collect_markdown(directory, relative):
+        for resource in sorted(directory.iterdir(), key=lambda item: item.name):
+            path = f"{relative}/{resource.name}"
+            if resource.is_dir():
+                collect_markdown(resource, path)
+            elif resource.is_file() and resource.name.endswith(".md"):
+                shared[path] = resource.read_bytes()
+
+    collect_markdown(kit.joinpath("core"), ".tact/core")
 
     version = metadata.version(PACKAGE)
     manifest = {
@@ -345,7 +358,7 @@ def installed_manifest(root: Path, shared: dict[str, bytes]) -> dict:
     ):
         raise InitError("Unsupported .tact/manifest.json. Restore a valid TacT installation record before updating.")
     for relative, digest in manifest["files"].items():
-        if (relative not in shared and relative != RETIRED_STYLE) or relative == ".tact/manifest.json":
+        if (relative not in shared and relative not in (RETIRED_STYLE, RETIRED_EXAMPLES)) or relative == ".tact/manifest.json":
             raise InitError(f"The installed manifest lists a file absent from this package: {relative}. Automatic removal is not supported; review the installation record.")
         if not isinstance(digest, str) or len(digest) != 64 or any(c not in "0123456789abcdef" for c in digest):
             raise InitError(f"Invalid recorded hash for {relative}. Restore the original manifest before updating.")
@@ -365,14 +378,16 @@ def plan_changes(root: Path, *, update: bool = False) -> list[Change]:
 
     changes = []
     conflicts = []
-    if previous is not None and RETIRED_STYLE in previous["files"]:
-        before = read_target(root, RETIRED_STYLE)
+    for relative in (RETIRED_STYLE, RETIRED_EXAMPLES):
+        if previous is None or relative not in previous["files"]:
+            continue
+        before = read_target(root, relative)
         if before is not None:
-            if sha256(before).hexdigest() == previous["files"][RETIRED_STYLE]:
-                changes.append(Change(root / RETIRED_STYLE, before, None))
+            if sha256(before).hexdigest() == previous["files"][relative]:
+                changes.append(Change(root / relative, before, None))
             else:
                 conflicts.append(
-                    f"{RETIRED_STYLE}: differs from the recorded installation; "
+                    f"{relative}: differs from the recorded installation; "
                     "review the local edits before removing this retired file."
                 )
     for relative, content in shared.items():
@@ -415,6 +430,17 @@ def plan_changes(root: Path, *, update: bool = False) -> list[Change]:
             "AGENTS.md still references the retired .tact/core/style.md. "
             "Update the custom project entry before refreshing."
         )
+    custom_entries = {
+        "AGENTS.md": after,
+        ".tact/project/communication.md": read_target(root, ".tact/project/communication.md"),
+        ".tact/project/style.md": read_target(root, ".tact/project/style.md"),
+    }
+    for name, content in custom_entries.items():
+        if content is not None and b"core/communication-examples.md" in content:
+            conflicts.append(
+                f"{name} still references the retired core/communication-examples.md. "
+                "Update the custom guidance before installing or refreshing."
+            )
     if before != after:
         changes.append(Change(
             root / "AGENTS.md", before, after,

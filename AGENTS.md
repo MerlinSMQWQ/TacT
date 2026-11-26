@@ -31,7 +31,7 @@ Before your first response in each new session, read this entry, [project/notes.
 
 **Complete required reading before the response or action it governs.** A file counts as read when its full current contents have reached the context available to you. A successful read command, a summary, or seeing the beginning and end of a file does not establish complete coverage. This applies to the startup files, topics triggered by the current task, matching project supplements, and further reading explicitly required by those files. The index does not require loading every topic for every task.
 
-After context compaction, check whether you still have the full text of [core/communication.md](core/communication.md) and [core/communication-examples.md](core/communication-examples.md). Before your next reply to the developer, reread any missing text. If only a summary, a path, or a record of an earlier read remains for a file, reread that file in full.
+After context compaction, check whether you still have the full text of [core/communication.md](core/communication.md), [core/example/README.md](core/example/README.md), and the required example identified there. Before your next reply to the developer, reread any missing text. If only a summary, a path, or a record of an earlier read remains for a file, reread that file in full.
 
 Keep reads within both individual and combined tool-output limits. Read long files separately in bounded, consecutive ranges, using file paths and line numbers to track coverage. Inspect the actual returned text for truncation, omitted sections, and incomplete lines. If output is cut, retrieve every missing range, including any partly returned line; if the gap is unclear, reread that file in smaller consecutive ranges. Do not repeat an oversized batch or resume from an arbitrary later line. Finish recovering the required content before proceeding. If retrieval remains blocked, report the specific gap and pause dependent actions. Reuse complete current contents already available; apply this check silently unless a gap needs the developer's attention.
 
@@ -91,7 +91,7 @@ ranges. Reuse complete current contents already in context. If required content
 remains unavailable, report the gap and pause dependent actions.
 
 After context compaction, check which of `.tact/core/communication.md` and
-`.tact/core/communication-examples.md` you still have in full. Before your next
+`.tact/core/example/README.md` and `.tact/core/example/advice/pi-subagents.md` you still have in full. Before your next
 reply to the developer, reread any missing text. If only a summary, a path, or a
 record of an earlier read remains for a file, reread that file in full.
 
