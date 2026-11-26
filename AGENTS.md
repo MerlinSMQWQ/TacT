@@ -27,11 +27,11 @@ These distill the most frequently needed judgments from the topic files; the ful
 
 ## Read session guidance before responding
 
-Before your first response in each new session, read this entry, [project/notes.md](project/notes.md), [core/communication.md](core/communication.md), and [core/style.md](core/style.md), along with `project/communication.md` and `project/style.md` if present. This includes short factual questions and casual conversation; it does not depend on a substantive task or explicit Skill invocation. Reuse their current contents when already supplied in this session; a reference to a file or a recollection from another session does not replace its contents. If required guidance is missing, report the gap and pause actions that depend on it; continue unaffected work.
+Before your first response in each new session, read this entry, [project/notes.md](project/notes.md), [core/communication.md](core/communication.md), along with `project/communication.md` and the former `project/style.md` supplement if present. This includes short factual questions and casual conversation; it does not depend on a substantive task or explicit Skill invocation. Reuse their current contents when already supplied in this session; a reference to a file or a recollection from another session does not replace its contents. If required guidance is missing, report the gap and pause actions that depend on it; continue unaffected work.
 
 **Complete required reading before the response or action it governs.** A file counts as read when its full current contents have reached the context available to you. A successful read command, a summary, or seeing the beginning and end of a file does not establish complete coverage. This applies to the startup files, topics triggered by the current task, matching project supplements, and further reading explicitly required by those files. The index does not require loading every topic for every task.
 
-After context compaction, check whether you still have the full text of [core/communication.md](core/communication.md), [core/style.md](core/style.md), and [core/communication-examples.md](core/communication-examples.md). Before your next reply to the developer, reread any missing text. If only a summary, a path, or a record of an earlier read remains for a file, reread that file in full.
+After context compaction, check whether you still have the full text of [core/communication.md](core/communication.md) and [core/communication-examples.md](core/communication-examples.md). Before your next reply to the developer, reread any missing text. If only a summary, a path, or a record of an earlier read remains for a file, reread that file in full.
 
 Keep reads within both individual and combined tool-output limits. Read long files separately in bounded, consecutive ranges, using file paths and line numbers to track coverage. Inspect the actual returned text for truncation, omitted sections, and incomplete lines. If output is cut, retrieve every missing range, including any partly returned line; if the gap is unclear, reread that file in smaller consecutive ranges. Do not repeat an oversized batch or resume from an arbitrary later line. Finish recovering the required content before proceeding. If retrieval remains blocked, report the specific gap and pause dependent actions. Reuse complete current contents already available; apply this check silently unless a gap needs the developer's attention.
 
@@ -58,7 +58,7 @@ In `notes.md`, distinguish confirmed requirements, observations, hypotheses, and
 - Before adding an abstraction, dependency, fallback, or defensive mechanism, removing an existing mechanism, or making an incidental change outside the task → [core/complexity.md](core/complexity.md).
 - When preparing substantive work, advancing within a step, investigating alongside shared deliberation, a check fails, state differs from expectations, attempts repeat without new evidence, or the plan's premises change → [core/working.md](core/working.md).
 - Before choosing verification scope, or resolving an evidence gap in a delivery claim → [core/verification.md](core/verification.md).
-- At the start of each session, before the first response, including simple questions and casual conversation → [core/communication.md](core/communication.md) and [core/style.md](core/style.md). Reuse current content during the session; revisit it when missing, changed, or needed to address an explanation, recommendation, report, handoff, or comment.
+- At the start of each session, before the first response, including simple questions and casual conversation → [core/communication.md](core/communication.md). Reuse current content during the session; revisit it when missing, changed, or needed to address an explanation, recommendation, report, handoff, or comment.
 - When designing agent-facing tool feedback, or deciding how to recover from uncertain tool execution → [core/tools.md](core/tools.md).
 - When recording reasoning, experience, or a recurring correction, or revising, generalizing, or removing guidance → [core/evolving.md](core/evolving.md).
 
@@ -74,15 +74,13 @@ For setup and shared updates, read [core/README.md](core/README.md). For project
 ## TacT Agent Kit
 
 Before your first response in each new session, read the [TacT entry](.tact/AGENTS.md),
-[project notes](.tact/project/notes.md),
-[communication guidance](.tact/core/communication.md), and
-[language and conversational style](.tact/core/style.md). Also read
-`.tact/project/communication.md` and `.tact/project/style.md` if present.
-This applies to short questions
-and casual conversation as well as engineering work; do not defer it until a
-substantive task. Reuse their current contents if already supplied in this
-session; otherwise read the files. Follow the entry's remaining topic-reading
-triggers and check matching project supplements.
+[project notes](.tact/project/notes.md), and
+[communication guidance](.tact/core/communication.md). Also read
+`.tact/project/communication.md` and the existing `.tact/project/style.md`
+if present. This applies to short questions and casual conversation as well as
+engineering work; do not defer it until a substantive task. Reuse their current
+contents if already supplied in this session; otherwise read the files. Follow
+the entry's remaining topic-reading triggers and check matching project supplements.
 
 Read each required file in full before the response or action it governs.
 Check the text actually returned: successful commands can still yield truncated
@@ -92,11 +90,10 @@ partly returned lines. If coverage is unclear, reread that file in smaller
 ranges. Reuse complete current contents already in context. If required content
 remains unavailable, report the gap and pause dependent actions.
 
-After context compaction, check which of `.tact/core/communication.md`,
-`.tact/core/style.md`, and `.tact/core/communication-examples.md` you still
-have in full. Before your next reply to the developer, reread any missing text.
-If only a summary, a path, or a record of an earlier read remains for a file,
-reread that file in full.
+After context compaction, check which of `.tact/core/communication.md` and
+`.tact/core/communication-examples.md` you still have in full. Before your next
+reply to the developer, reread any missing text. If only a summary, a path, or a
+record of an earlier read remains for a file, reread that file in full.
 
 The Kit root is `.tact/` in this repository. Resolve paths inside the Kit from
 that directory, even when working in a subdirectory. Keep the existing repository

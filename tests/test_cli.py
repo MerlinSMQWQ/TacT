@@ -107,6 +107,18 @@ ask about consequential unresolved conflicts before taking dependent actions.
 <!-- tact:end -->
 """
 
+# Generated after post-compaction rereading was added.
+POST_COMPACTION_STYLE_ENTRY = STYLE_READING_ENTRY.replace(
+    "The Kit root is `.tact/` in this repository.",
+    """After context compaction, check which of `.tact/core/communication.md`,
+`.tact/core/style.md`, and `.tact/core/communication-examples.md` you still
+have in full. Before your next reply to the developer, reread any missing text.
+If only a summary, a path, or a record of an earlier read remains for a file,
+reread that file in full.
+
+The Kit root is `.tact/` in this repository.""",
+)
+
 
 class InitTests(unittest.TestCase):
     def setUp(self):
@@ -167,10 +179,10 @@ class InitTests(unittest.TestCase):
             self.assertEqual(sha256((self.root / relative).read_bytes()).hexdigest(), digest)
         self.assertIn(".tact/AGENTS.md", (self.root / "AGENTS.md").read_text())
         self.assertIn(".tact/core/communication.md", (self.root / "AGENTS.md").read_text())
-        self.assertIn(".tact/core/style.md", (self.root / "AGENTS.md").read_text())
+        self.assertNotIn(".tact/core/style.md", (self.root / "AGENTS.md").read_text())
         for entry in (kit / "AGENTS.md", self.root / "AGENTS.md"):
             recovery = entry.read_text().split("After context compaction", 1)[1].split("\n\n", 1)[0]
-            for name in ("communication.md", "style.md", "communication-examples.md"):
+            for name in ("communication.md", "communication-examples.md"):
                 self.assertIn(f"core/{name}", recovery)
         skill = self.root / ".agents/skills/tact"
         for relative in ("SKILL.md", "agents/openai.yaml"):
@@ -352,9 +364,9 @@ class InitTests(unittest.TestCase):
         manifest = json.loads(manifest_path.read_text())
         manifest["version"] = "0.1.0"
         manifest["files"][".tact/core/README.md"] = sha256(old_readme.read_bytes()).hexdigest()
-        # Older releases installed no skill or style file; refresh must add both.
+        # Older releases installed no skill; refresh must add it.
         for relative in list(manifest["files"]):
-            if relative.startswith(".agents/") or relative == ".tact/core/style.md":
+            if relative.startswith(".agents/"):
                 (self.root / relative).unlink()
                 del manifest["files"][relative]
         manifest_path.write_text(json.dumps(manifest, indent=2) + "\n")
@@ -375,7 +387,6 @@ class InitTests(unittest.TestCase):
         preview = self.run_cli("refresh", self.root, "--dry-run", cwd=self.temp.name)
         self.assertIn("WOULD UPDATE .tact/core/README.md", preview.stdout)
         self.assertIn("WOULD CREATE .agents/skills/tact/SKILL.md", preview.stdout)
-        self.assertIn("WOULD CREATE .tact/core/style.md", preview.stdout)
         self.assertIn("+This file intentionally starts nearly empty", preview.stdout)
         self.assertEqual(before, self.snapshot())
         result = self.run_cli("refresh")
@@ -383,8 +394,6 @@ class InitTests(unittest.TestCase):
         self.assertEqual(old_readme.read_bytes(), (SOURCE_ROOT / "core/README.md").read_bytes())
         self.assertEqual(old_readme.stat().st_mode & 0o777, 0o640)
         self.assertTrue((self.root / ".agents/skills/tact/agents/openai.yaml").is_file())
-        self.assertEqual((self.root / ".tact/core/style.md").read_bytes(),
-                         (SOURCE_ROOT / "core/style.md").read_bytes())
         notes = (self.root / ".tact/project/notes.md").read_text()
         self.assertIn("project maintainer and agents", notes)
         self.assertIn(f"version `{metadata.version('tact-agent-kit')}`", notes)
@@ -421,6 +430,7 @@ class InitTests(unittest.TestCase):
             (INITIAL_READING_ENTRY, b"\n"), (INITIAL_READING_ENTRY, b"\r\n"),
             (COMPLETE_READING_ENTRY, b"\n"), (COMPLETE_READING_ENTRY, b"\r\n"),
             (STYLE_READING_ENTRY, b"\n"), (STYLE_READING_ENTRY, b"\r\n"),
+            (POST_COMPACTION_STYLE_ENTRY, b"\n"), (POST_COMPACTION_STYLE_ENTRY, b"\r\n"),
         ):
             with self.subTest(legacy=legacy, newline=newline):
                 self.prepare_older_kit()
@@ -440,7 +450,6 @@ class InitTests(unittest.TestCase):
                 self.assertEqual(before, self.snapshot())
                 preview = self.run_cli("refresh", "--dry-run")
                 self.assertIn("WOULD UPDATE AGENTS.md", preview.stdout)
-                self.assertIn(".tact/core/style.md", preview.stdout)
                 self.assertEqual(before, self.snapshot())
 
                 self.run_cli("refresh")
@@ -543,7 +552,7 @@ class InitTests(unittest.TestCase):
                 self.assertEqual(before, self.snapshot())
                 self.run_cli("refresh")
                 self.assertIn(b"[communication guidance](.tact/core/communication.md)", entry.read_bytes())
-                self.assertIn(b".tact/core/style.md", entry.read_bytes())
+                self.assertNotIn(b".tact/core/style.md", entry.read_bytes())
                 self.assertEqual((self.root / ".tact/core/README.md").read_bytes(),
                                  (SOURCE_ROOT / "core/README.md").read_bytes())
 
@@ -620,6 +629,79 @@ class InitTests(unittest.TestCase):
         self.assertEqual((self.root / ".tact/core/tools.md").read_bytes(), (SOURCE_ROOT / "core/tools.md").read_bytes())
         self.assertIn("Already initialized", self.run_cli("init").stdout)
 
+    def install_previous_style(self):
+        self.run_cli("init")
+        old_style = self.root / ".tact/core/style.md"
+        old_style.write_text("Earlier shared style guidance.\n")
+        manifest_path = self.root / ".tact/manifest.json"
+        manifest = json.loads(manifest_path.read_text())
+        manifest["files"][".tact/core/style.md"] = sha256(old_style.read_bytes()).hexdigest()
+        manifest_path.write_text(json.dumps(manifest))
+        return old_style, manifest_path
+
+    def test_refresh_removes_unmodified_retired_style_and_migrates_entry(self):
+        old_style, manifest_path = self.install_previous_style()
+        entry = self.root / "AGENTS.md"
+        entry.write_text(POST_COMPACTION_STYLE_ENTRY)
+        supplement = self.root / ".tact/project/style.md"
+        supplement.write_text("Our own preferences.\n")
+        before = self.snapshot()
+        preview = self.run_cli("refresh", "--dry-run")
+        self.assertIn("WOULD DELETE .tact/core/style.md", preview.stdout)
+        self.assertEqual(self.snapshot(), before)
+        self.run_cli("refresh")
+        self.assertFalse(old_style.exists())
+        self.assertNotIn(".tact/core/style.md", json.loads(manifest_path.read_text())["files"])
+        self.assertNotIn(".tact/core/style.md", entry.read_text())
+        self.assertIn(".tact/project/style.md", entry.read_text())
+        self.assertEqual(supplement.read_text(), "Our own preferences.\n")
+        self.assertIn("Already up to date", self.run_cli("refresh").stdout)
+
+    def test_refresh_refuses_modified_retired_style_before_writing(self):
+        old_style, _ = self.install_previous_style()
+        old_style.write_text("Local changes to shared style.\n")
+        before = self.snapshot()
+        for args in [(), ("--dry-run",)]:
+            result = self.run_cli("refresh", *args, expected=1)
+            self.assertIn("review the local edits", result.stderr)
+            self.assertEqual(self.snapshot(), before)
+
+    def test_refresh_accepts_retired_style_already_missing(self):
+        old_style, manifest_path = self.install_previous_style()
+        old_style.unlink()
+        self.run_cli("refresh")
+        self.assertNotIn(".tact/core/style.md", json.loads(manifest_path.read_text())["files"])
+
+    def test_refresh_refuses_custom_entry_that_still_references_retired_style(self):
+        self.install_previous_style()
+        entry = self.root / "AGENTS.md"
+        entry.write_text("# Our instructions\nRead .tact/core/style.md.\n")
+        before = self.snapshot()
+        for args in [(), ("--dry-run",)]:
+            result = self.run_cli("refresh", *args, expected=1)
+            self.assertIn("Update the custom project entry", result.stderr)
+            self.assertEqual(self.snapshot(), before)
+
+    def test_interrupted_retired_style_removal_can_resume(self):
+        from tact.cli import main
+
+        old_style, manifest = self.install_previous_style()
+        (self.root / "AGENTS.md").write_text(POST_COMPACTION_STYLE_ENTRY)
+        old_manifest = manifest.read_bytes()
+        replace = Path.replace
+
+        def fail_manifest(path, destination):
+            if destination.resolve() == manifest.resolve():
+                raise OSError("simulated storage failure")
+            return replace(path, destination)
+
+        with mock.patch.object(Path, "replace", fail_manifest), redirect_stdout(io.StringIO()), redirect_stderr(io.StringIO()):
+            self.assertEqual(main(["refresh", str(self.root)]), 1)
+        self.assertFalse(old_style.exists())
+        self.assertEqual(manifest.read_bytes(), old_manifest)
+        self.run_cli("refresh")
+        self.assertNotIn(".tact/core/style.md", json.loads(manifest.read_text())["files"])
+
     def test_skill_conflicts_stop_init_and_refresh_without_overwriting_other_skills(self):
         for relative in ("SKILL.md", "agents/openai.yaml"):
             with self.subTest(relative=relative):
@@ -674,7 +756,6 @@ class InitTests(unittest.TestCase):
             {(skill.parent / destination).resolve() for destination in destinations},
             {(self.root / relative).resolve() for relative in (
                 ".tact/AGENTS.md", ".tact/project/notes.md", ".tact/core/communication.md",
-                ".tact/core/style.md",
             )},
         )
 
