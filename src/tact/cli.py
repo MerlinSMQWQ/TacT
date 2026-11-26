@@ -15,6 +15,8 @@ PACKAGE = "tact-agent-kit"
 SOURCE = "https://github.com/MerlinSMQWQ/TacT"
 BEGIN = "<!-- tact:begin -->"
 END = "<!-- tact:end -->"
+RETIRED_STYLE = ".tact/core/style.md"
+RETIRED_EXAMPLES = ".tact/core/communication-examples.md"
 # The exact entry emitted before communication became required on the first turn.
 # Only an explicit refresh may migrate this known template.
 LEGACY_ENTRY = f"""{BEGIN}
@@ -106,8 +108,7 @@ ask about consequential unresolved conflicts before taking dependent actions.
 {END}
 """
 
-LEGACY_ENTRIES = (LEGACY_ENTRY, INITIAL_READING_ENTRY, COMPLETE_READING_ENTRY, STYLE_READING_ENTRY)
-ENTRY = f"""{BEGIN}
+POST_COMPACTION_STYLE_ENTRY = f"""{BEGIN}
 ## TacT Agent Kit
 
 Before your first response in each new session, read the [TacT entry](.tact/AGENTS.md),
@@ -142,6 +143,49 @@ ask about consequential unresolved conflicts before taking dependent actions.
 {END}
 """
 
+OLD_EXAMPLES_ENTRY = f"""{BEGIN}
+## TacT Agent Kit
+
+Before your first response in each new session, read the [TacT entry](.tact/AGENTS.md),
+[project notes](.tact/project/notes.md), and
+[communication guidance](.tact/core/communication.md). Also read
+`.tact/project/communication.md` and the existing `.tact/project/style.md`
+if present. This applies to short questions and casual conversation as well as
+engineering work; do not defer it until a substantive task. Reuse their current
+contents if already supplied in this session; otherwise read the files. Follow
+the entry's remaining topic-reading triggers and check matching project supplements.
+
+Read each required file in full before the response or action it governs.
+Check the text actually returned: successful commands can still yield truncated
+output. Keep reads within individual and combined output limits; read long files
+separately in consecutive ranges and recover every missing range, including
+partly returned lines. If coverage is unclear, reread that file in smaller
+ranges. Reuse complete current contents already in context. If required content
+remains unavailable, report the gap and pause dependent actions.
+
+After context compaction, check which of `.tact/core/communication.md` and
+`.tact/core/communication-examples.md` you still have in full. Before your next
+reply to the developer, reread any missing text. If only a summary, a path, or a
+record of an earlier read remains for a file, reread that file in full.
+
+The Kit root is `.tact/` in this repository. Resolve paths inside the Kit from
+that directory, even when working in a subdirectory. Keep the existing repository
+instructions in force. Resolve conflicts using the host's instruction hierarchy;
+ask about consequential unresolved conflicts before taking dependent actions.
+{END}
+"""
+
+
+LEGACY_ENTRIES = (
+    LEGACY_ENTRY, INITIAL_READING_ENTRY, COMPLETE_READING_ENTRY,
+    STYLE_READING_ENTRY, POST_COMPACTION_STYLE_ENTRY, OLD_EXAMPLES_ENTRY,
+)
+ENTRY = OLD_EXAMPLES_ENTRY.replace(
+    "`.tact/core/communication-examples.md`",
+    "`.tact/core/example/README.md` and `.tact/core/example/advice/pi-subagents.md`",
+)
+
+
 
 class InitError(Exception):
     """A Kit operation cannot proceed safely."""
@@ -151,11 +195,13 @@ class InitError(Exception):
 class Change:
     path: Path
     before: bytes | None
-    after: bytes
+    after: bytes | None
     append: bool = False
 
     @property
     def action(self) -> str:
+        if self.after is None:
+            return "DELETE"
         if self.before is None:
             return "CREATE"
         return "APPEND" if self.append else "UPDATE"
@@ -179,10 +225,10 @@ def read_target(root: Path, relative: str) -> bytes | None:
     return None
 
 
-def show_diff(relative: str, before: bytes | None, after: bytes) -> str:
+def show_diff(relative: str, before: bytes | None, after: bytes | None) -> str:
     lines = list(unified_diff(
         (before or b"").decode("utf-8", errors="replace").splitlines(),
-        after.decode("utf-8", errors="replace").splitlines(),
+        (after or b"").decode("utf-8", errors="replace").splitlines(),
         fromfile=f"{relative} (current)",
         tofile=f"{relative} (proposed)",
         lineterm="",
@@ -266,9 +312,15 @@ def bundled_files() -> tuple[dict[str, bytes], dict[str, bytes]]:
         ".agents/skills/tact/SKILL.md": kit.joinpath("skills/tact/SKILL.md").read_bytes(),
         ".agents/skills/tact/agents/openai.yaml": kit.joinpath("skills/tact/agents/openai.yaml").read_bytes(),
     }
-    for resource in sorted(kit.joinpath("core").iterdir(), key=lambda item: item.name):
-        if resource.is_file() and resource.name.endswith(".md"):
-            shared[f".tact/core/{resource.name}"] = resource.read_bytes()
+    def collect_markdown(directory, relative):
+        for resource in sorted(directory.iterdir(), key=lambda item: item.name):
+            path = f"{relative}/{resource.name}"
+            if resource.is_dir():
+                collect_markdown(resource, path)
+            elif resource.is_file() and resource.name.endswith(".md"):
+                shared[path] = resource.read_bytes()
+
+    collect_markdown(kit.joinpath("core"), ".tact/core")
 
     version = metadata.version(PACKAGE)
     manifest = {
@@ -306,7 +358,7 @@ def installed_manifest(root: Path, shared: dict[str, bytes]) -> dict:
     ):
         raise InitError("Unsupported .tact/manifest.json. Restore a valid TacT installation record before updating.")
     for relative, digest in manifest["files"].items():
-        if relative not in shared or relative == ".tact/manifest.json":
+        if (relative not in shared and relative not in (RETIRED_STYLE, RETIRED_EXAMPLES)) or relative == ".tact/manifest.json":
             raise InitError(f"The installed manifest lists a file absent from this package: {relative}. Automatic removal is not supported; review the installation record.")
         if not isinstance(digest, str) or len(digest) != 64 or any(c not in "0123456789abcdef" for c in digest):
             raise InitError(f"Invalid recorded hash for {relative}. Restore the original manifest before updating.")
@@ -326,6 +378,18 @@ def plan_changes(root: Path, *, update: bool = False) -> list[Change]:
 
     changes = []
     conflicts = []
+    for relative in (RETIRED_STYLE, RETIRED_EXAMPLES):
+        if previous is None or relative not in previous["files"]:
+            continue
+        before = read_target(root, relative)
+        if before is not None:
+            if sha256(before).hexdigest() == previous["files"][relative]:
+                changes.append(Change(root / relative, before, None))
+            else:
+                conflicts.append(
+                    f"{relative}: differs from the recorded installation; "
+                    "review the local edits before removing this retired file."
+                )
     for relative, content in shared.items():
         if relative == ".tact/manifest.json":
             continue
@@ -361,6 +425,22 @@ def plan_changes(root: Path, *, update: bool = False) -> list[Change]:
 
     before = read_target(root, "AGENTS.md")
     after = entry_content(before, update=update)
+    if update and after is not None and RETIRED_STYLE.encode() in after:
+        conflicts.append(
+            "AGENTS.md still references the retired .tact/core/style.md. "
+            "Update the custom project entry before refreshing."
+        )
+    custom_entries = {
+        "AGENTS.md": after,
+        ".tact/project/communication.md": read_target(root, ".tact/project/communication.md"),
+        ".tact/project/style.md": read_target(root, ".tact/project/style.md"),
+    }
+    for name, content in custom_entries.items():
+        if content is not None and b"core/communication-examples.md" in content:
+            conflicts.append(
+                f"{name} still references the retired core/communication-examples.md. "
+                "Update the custom guidance before installing or refreshing."
+            )
     if before != after:
         changes.append(Change(
             root / "AGENTS.md", before, after,
@@ -397,7 +477,9 @@ def apply_changes(root: Path, changes: list[Change]) -> None:
         if read_target(root, relative) != change.before:
             raise InitError(f"{relative} changed during writing. Inspect the reported files before retrying.")
         change.path.parent.mkdir(parents=True, exist_ok=True)
-        if change.before is None:
+        if change.after is None:
+            change.path.unlink()
+        elif change.before is None:
             with change.path.open("xb") as stream:
                 stream.write(change.after)
         elif change.append:

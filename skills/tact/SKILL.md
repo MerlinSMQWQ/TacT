@@ -9,10 +9,9 @@ Use the TacT snapshot installed in this project to guide the current task.
 
 On first use in a session, before responding, read the [TacT entry](../../../.tact/AGENTS.md),
 [project notes](../../../.tact/project/notes.md),
-[communication guidance](../../../.tact/core/communication.md), and
-[language and conversational style](../../../.tact/core/style.md), along with
-`../../../.tact/project/communication.md` and `../../../.tact/project/style.md`
-if present. This includes short questions
+[communication guidance](../../../.tact/core/communication.md), along with
+`../../../.tact/project/communication.md` and the former `../../../.tact/project/style.md`
+supplement if present. This includes short questions
 and casual conversation. Reuse their current contents if already supplied in
 this session; otherwise read the files. Follow the entry's remaining topic-reading
 triggers and read matching project supplements when present.
